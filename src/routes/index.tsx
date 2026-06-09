@@ -70,9 +70,9 @@ function Index() {
     <div className="relative overflow-hidden bg-black">
       <section className="relative min-h-[760px] overflow-hidden px-4 pb-12 pt-28 sm:px-6 lg:min-h-screen lg:pt-32">
         <div className="absolute inset-0 bg-[#030303]">
-          <DottedSurface className="absolute inset-0 h-full w-full opacity-70" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.12),transparent_48%)] blur-[30px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(130,0,219,0.22),transparent_30%),linear-gradient(to_bottom,rgba(0,0,0,0.12),rgba(0,0,0,0.9)_82%,#000_100%)]" />
+          <DottedSurface className="absolute inset-0 h-full w-full opacity-100" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1),transparent_50%)] blur-[30px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.18)_62%,#000_100%)]" />
         </div>
 
         <div className="relative z-10 mx-auto flex min-h-[620px] max-w-6xl flex-col items-center justify-center text-center">

@@ -19,14 +19,14 @@ export function DottedSurface({ className, color = "light", ...props }: DottedSu
       const THREE = await import("three");
       if (disposed) return;
 
-      const separation = 120;
-      const amountX = 52;
-      const amountY = 44;
+      const separation = 150;
+      const amountX = 40;
+      const amountY = 60;
       const scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0xffffff, 1800, 9800);
+      scene.fog = new THREE.Fog(0xffffff, 2000, 10000);
 
-      const camera = new THREE.PerspectiveCamera(58, 1, 1, 10000);
-      camera.position.set(0, 420, 1180);
+      const camera = new THREE.PerspectiveCamera(60, 1, 1, 10000);
+      camera.position.set(0, 355, 1220);
 
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -36,7 +36,7 @@ export function DottedSurface({ className, color = "light", ...props }: DottedSu
       const geometry = new THREE.BufferGeometry();
       const positions: number[] = [];
       const colors: number[] = [];
-      const pointColor = color === "dark" ? 0 : 1;
+      const pointColor = color === "dark" ? 0 : 0.78;
 
       for (let ix = 0; ix < amountX; ix++) {
         for (let iy = 0; iy < amountY; iy++) {
@@ -53,10 +53,10 @@ export function DottedSurface({ className, color = "light", ...props }: DottedSu
       geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
 
       const material = new THREE.PointsMaterial({
-        size: 7,
+        size: 8,
         vertexColors: true,
         transparent: true,
-        opacity: color === "dark" ? 0.42 : 0.52,
+        opacity: color === "dark" ? 0.8 : 0.82,
         sizeAttenuation: true,
       });
 
@@ -84,14 +84,14 @@ export function DottedSurface({ className, color = "light", ...props }: DottedSu
           for (let iy = 0; iy < amountY; iy++) {
             const index = i * 3;
             currentPositions[index + 1] =
-              Math.sin((ix + count) * 0.28) * 42 + Math.sin((iy + count) * 0.46) * 52;
+              Math.sin((ix + count) * 0.3) * 50 + Math.sin((iy + count) * 0.5) * 50;
             i++;
           }
         }
 
         positionAttribute.needsUpdate = true;
         renderer.render(scene, camera);
-        count += 0.06;
+        count += 0.1;
       };
 
       handleResize();
