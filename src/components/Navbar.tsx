@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Film, Upload, LayoutDashboard, LogOut, LogIn, Languages, Shield } from "lucide-react";
+import { Film, Upload, LayoutDashboard, LogOut, LogIn, Languages } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
+  const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
@@ -25,34 +27,70 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mt-4 flex h-14 items-center justify-between border border-white/10 bg-background/72 px-3 shadow-[var(--shadow-glass)] backdrop-blur-xl">
+    <header className="fixed left-0 right-0 top-0 z-40 w-full rounded-b-[15px] border-b border-gray-700/30 bg-[#0d0d18]/30 backdrop-blur-md">
+      <div className="container mx-auto px-4 py-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
-            <span className="grid h-8 w-8 place-items-center [background:var(--gradient-primary)] shadow-[var(--shadow-neon)]">
-              <Film className="h-4 w-4 text-primary-foreground" />
+            <span className="grid h-8 w-8 place-items-center rounded-full text-white">
+              <Film className="h-4 w-4 text-white" />
             </span>
-            <span className="text-gradient">YCT</span>
+            <span className="text-white">YCT</span>
           </Link>
 
-          <nav className="hidden items-center gap-1 sm:flex">
-            <NavLink to="/" label={t("nav_home")} active={path === "/"} />
-            <NavLink to="/tournament" label="Турнир" active={path.startsWith("/tournament")} />
-            <NavLink to="/explore" label={t("nav_explore")} active={path.startsWith("/explore")} />
+          <nav
+            className="hidden items-center gap-6 lg:flex"
+            onMouseLeave={() => setHoveredNavItem(null)}
+          >
+            <NavLink
+              to="/"
+              label={t("nav_home")}
+              active={path === "/"}
+              item="home"
+              hoveredNavItem={hoveredNavItem}
+              setHoveredNavItem={setHoveredNavItem}
+            />
+            <NavLink
+              to="/tournament"
+              label="Турнир"
+              active={path.startsWith("/tournament")}
+              item="tournament"
+              hoveredNavItem={hoveredNavItem}
+              setHoveredNavItem={setHoveredNavItem}
+            />
+            <NavLink
+              to="/explore"
+              label={t("nav_explore")}
+              active={path.startsWith("/explore")}
+              item="explore"
+              hoveredNavItem={hoveredNavItem}
+              setHoveredNavItem={setHoveredNavItem}
+            />
             {user && (
               <NavLink
                 to="/dashboard"
                 label={t("nav_dashboard")}
                 active={path.startsWith("/dashboard")}
+                item="dashboard"
+                hoveredNavItem={hoveredNavItem}
+                setHoveredNavItem={setHoveredNavItem}
               />
             )}
-            {isAdmin && <NavLink to="/admin" label="Admin" active={path.startsWith("/admin")} />}
+            {isAdmin && (
+              <NavLink
+                to="/admin"
+                label="Admin"
+                active={path.startsWith("/admin")}
+                item="admin"
+                hoveredNavItem={hoveredNavItem}
+                setHoveredNavItem={setHoveredNavItem}
+              />
+            )}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 md:gap-5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1 px-2">
+                <Button variant="ghost" size="sm" className="gap-1 rounded-full px-2 text-gray-300">
                   <Languages className="h-4 w-4" />
                   <span className="text-xs uppercase">{lang}</span>
                 </Button>
@@ -91,7 +129,12 @@ export function Navbar() {
                 </Button>
               </>
             ) : (
-              <Button asChild variant="hero" size="sm">
+              <Button
+                asChild
+                variant="glass"
+                size="sm"
+                className="rounded-full border-[#322D36] bg-[#8200DB29] px-5 font-semibold text-white hover:bg-black/50"
+              >
                 <Link to="/login">
                   <LogIn className="h-4 w-4" /> {t("nav_login")}
                 </Link>
@@ -104,14 +147,34 @@ export function Navbar() {
   );
 }
 
-function NavLink({ to, label, active }: { to: string; label: string; active: boolean }) {
+function NavLink({
+  to,
+  label,
+  active,
+  item,
+  hoveredNavItem,
+  setHoveredNavItem,
+}: {
+  to: string;
+  label: string;
+  active: boolean;
+  item: string;
+  hoveredNavItem: string | null;
+  setHoveredNavItem: (item: string | null) => void;
+}) {
+  const isCurrentItemHovered = hoveredNavItem === item;
+  const isAnotherItemHovered = hoveredNavItem !== null && !isCurrentItemHovered;
+
   return (
     <Link
       to={to}
-      className={`px-3 py-1.5 text-sm transition-colors ${
-        active
-          ? "bg-white/8 text-foreground shadow-[inset_0_-1px_0_var(--accent)]"
-          : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+      onMouseEnter={() => setHoveredNavItem(item)}
+      className={`text-sm transition duration-150 ${
+        isCurrentItemHovered || active
+          ? "text-white"
+          : isAnotherItemHovered
+            ? "text-gray-500"
+            : "text-gray-300"
       }`}
     >
       {label}

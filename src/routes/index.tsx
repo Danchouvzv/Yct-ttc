@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import {
   ArrowRight,
-  CalendarClock,
   Clapperboard,
   Coins,
   FileDown,
@@ -21,6 +21,8 @@ import { useReveal } from "@/hooks/use-reveal";
 import { useI18n } from "@/i18n";
 import { formatDeadline } from "@/lib/tournament";
 
+const Spline = lazy(() => import("@splinetool/react-spline"));
+
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
@@ -37,6 +39,26 @@ export const Route = createFileRoute("/")({
 function Index() {
   useReveal();
   const { t } = useI18n();
+  const screenshotRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      requestAnimationFrame(() => {
+        const scrollPosition = window.pageYOffset;
+        if (screenshotRef.current) {
+          screenshotRef.current.style.transform = `translateY(-${scrollPosition * 0.22}px)`;
+        }
+        if (heroContentRef.current) {
+          const opacity = 1 - Math.min(scrollPosition / 420, 1);
+          heroContentRef.current.style.opacity = opacity.toString();
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { data: films } = useQuery({
     queryKey: ["films-featured"],
@@ -67,54 +89,70 @@ function Index() {
   });
 
   return (
-    <div className="relative">
-      <section className="hero-frame relative -mt-[72px] overflow-hidden px-4 pb-12 pt-28 sm:px-6 lg:pb-16 lg:pt-36">
-        <div className="sprocket pointer-events-none absolute left-0 right-0 top-[92px] h-3 opacity-45" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background to-transparent" />
+    <div className="relative bg-black">
+      <section className="relative min-h-screen overflow-hidden">
+        <HeroGalaxyBackground />
 
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-end">
-          <div className="animate-fade-up max-w-3xl pb-8">
-            <span className="eyebrow">
-              <Trophy className="h-3.5 w-3.5 text-accent" />
-              {t("hero_kicker")}
-            </span>
-            <h1 className="mt-6 max-w-4xl font-display text-5xl leading-[1.02] sm:text-7xl lg:text-8xl">
-              <span className="text-gradient">{t("hero_title_a")}</span>
-              <br />
-              <em className="font-serif italic font-normal text-foreground/95">
-                {t("hero_title_b")}
-              </em>
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl">
-              {t("hero_sub")} Команды снимают короткий метр, проходят отбор и борются за призовой
-              фонд.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild variant="hero" size="xl">
-                <Link to="/signup">
-                  <Upload className="h-5 w-5" />
-                  {t("hero_cta_join")}
-                </Link>
-              </Button>
-              <Button asChild variant="neon" size="xl">
-                <Link to="/tournament">
-                  <Play className="h-5 w-5" />
-                  Правила турнира
-                </Link>
-              </Button>
+        <div
+          ref={heroContentRef}
+          className="pointer-events-none absolute inset-0 z-10 flex items-center"
+        >
+          <div className="container mx-auto px-4 md:px-6 lg:px-8">
+            <div className="max-w-3xl pt-16 text-left text-white sm:pt-24 md:pt-32">
+              <p className="mb-5 text-xs uppercase text-gray-300">{t("hero_kicker")}</p>
+              <h1 className="mb-5 text-4xl font-bold leading-tight tracking-wide sm:text-6xl md:text-7xl">
+                Каждый кадр
+                <br className="hidden sm:block" /> становится историей.
+              </h1>
+              <p className="mb-8 max-w-xl text-base leading-7 text-gray-300 sm:text-lg md:text-xl">
+                Соберите команду, снимите короткометражный фильм и поборитесь за призовой фонд в
+                международном кино-турнире YCT.
+              </p>
+              <div className="pointer-events-auto flex flex-col items-start gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  variant="glass"
+                  size="xl"
+                  className="rounded-full border-[#322D36] bg-[#8200DB29] font-semibold text-white hover:bg-black/50"
+                >
+                  <Link to="/signup">
+                    <Upload className="h-5 w-5" />
+                    {t("hero_cta_join")}
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="glass"
+                  size="xl"
+                  className="rounded-full border-gray-600 bg-black/60 text-gray-200 hover:border-gray-400 hover:text-white"
+                >
+                  <Link to="/tournament">
+                    <Play className="h-5 w-5" />
+                    Правила турнира
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div className="grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-2 lg:grid-cols-4">
-            <HeroMetric label="Призовой фонд" value={t("ti_prize_amount")} />
-            <HeroMetric label="Команда" value="3-7 человек" />
-            <HeroMetric label="Хронометраж" value="5-12 минут" />
-            <HeroMetric label="Дедлайн" value={formatDeadline("ru")} />
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-4 px-4 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="relative z-10 -mt-[14vh] bg-black pb-16">
+        <section className="container mx-auto px-4 md:px-6 lg:px-8">
+          <div
+            ref={screenshotRef}
+            className="mx-auto w-full overflow-hidden rounded-xl border border-gray-700/50 bg-gray-900 shadow-2xl md:w-[82%] lg:w-[72%]"
+          >
+            <img
+              src="/images/yct-hero-cinema.png"
+              alt="YCT cinema preview"
+              className="mx-auto block h-auto w-full rounded-lg"
+            />
+          </div>
+        </section>
+      </div>
+
+      <section className="mx-auto grid max-w-7xl gap-4 px-4 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="surface reveal p-6 sm:p-8">
           <span className="eyebrow">
             <Trophy className="h-3.5 w-3.5 text-accent" />
@@ -249,6 +287,20 @@ function Index() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function HeroGalaxyBackground() {
+  return (
+    <div className="absolute inset-0 z-0 h-screen overflow-hidden">
+      <Suspense fallback={<div className="h-screen w-full bg-black" />}>
+        <Spline
+          className="h-screen w-full"
+          scene="https://prod.spline.design/us3ALejTXl6usHZ7/scene.splinecode"
+        />
+      </Suspense>
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.88),transparent_30%,transparent_70%,rgba(0,0,0,0.84)),linear-gradient(to_bottom,transparent_48%,rgba(0,0,0,0.94))]" />
     </div>
   );
 }
