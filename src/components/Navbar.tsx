@@ -5,7 +5,10 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
 import { useI18n, type Lang } from "@/i18n";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
@@ -24,9 +27,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mt-4 flex h-14 items-center justify-between rounded-2xl glass px-4 shadow-[var(--shadow-glass)]">
+        <div className="mt-4 flex h-14 items-center justify-between border border-white/10 bg-background/72 px-3 shadow-[var(--shadow-glass)] backdrop-blur-xl">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
-            <span className="grid h-8 w-8 place-items-center rounded-lg [background:var(--gradient-primary)] shadow-[var(--shadow-neon)]">
+            <span className="grid h-8 w-8 place-items-center [background:var(--gradient-primary)] shadow-[var(--shadow-neon)]">
               <Film className="h-4 w-4 text-primary-foreground" />
             </span>
             <span className="text-gradient">YCT</span>
@@ -37,11 +40,13 @@ export function Navbar() {
             <NavLink to="/tournament" label="Турнир" active={path.startsWith("/tournament")} />
             <NavLink to="/explore" label={t("nav_explore")} active={path.startsWith("/explore")} />
             {user && (
-              <NavLink to="/dashboard" label={t("nav_dashboard")} active={path.startsWith("/dashboard")} />
+              <NavLink
+                to="/dashboard"
+                label={t("nav_dashboard")}
+                active={path.startsWith("/dashboard")}
+              />
             )}
-            {isAdmin && (
-              <NavLink to="/admin" label="Admin" active={path.startsWith("/admin")} />
-            )}
+            {isAdmin && <NavLink to="/admin" label="Admin" active={path.startsWith("/admin")} />}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -103,8 +108,10 @@ function NavLink({ to, label, active }: { to: string; label: string; active: boo
   return (
     <Link
       to={to}
-      className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
-        active ? "text-foreground bg-white/5" : "text-muted-foreground hover:text-foreground"
+      className={`px-3 py-1.5 text-sm transition-colors ${
+        active
+          ? "bg-white/8 text-foreground shadow-[inset_0_-1px_0_var(--accent)]"
+          : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
       }`}
     >
       {label}

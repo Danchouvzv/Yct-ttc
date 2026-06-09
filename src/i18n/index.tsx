@@ -44,9 +44,9 @@ const D: Dict = {
   ti_prize_amount: { ru: "1 000 000 ₸", kk: "1 000 000 ₸", en: "1,000,000 ₸" },
   ti_format: { ru: "Формат фильмов", kk: "Фильм форматы", en: "Film format" },
   ti_format_body: {
-    ru: "Горизонтальный кадр, хронометраж 5–15 минут.",
-    kk: "Көлденең кадр, ұзақтығы 5–15 минут.",
-    en: "Horizontal frame, 5–15 minutes runtime.",
+    ru: "Горизонтальный кадр, хронометраж 5–12 минут.",
+    kk: "Көлденең кадр, ұзақтығы 5–12 минут.",
+    en: "Horizontal frame, 5–12 minutes runtime.",
   },
   ti_bonus: { ru: "Доп. баллы", kk: "Қосымша ұпайлар", en: "Bonus points" },
   ti_bonus_body: {

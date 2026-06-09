@@ -1,14 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Play, Upload, Sparkles, Trophy, Users, Coins, Clapperboard,
-  Globe2, FileDown, Snowflake, Sun, Film as FilmIcon,
+  ArrowRight,
+  CalendarClock,
+  Clapperboard,
+  Coins,
+  FileDown,
+  Film as FilmIcon,
+  Globe2,
+  Play,
+  Sparkles,
+  Trophy,
+  Upload,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { FilmCard } from "@/components/FilmCard";
 import { useReveal } from "@/hooks/use-reveal";
 import { useI18n } from "@/i18n";
+import { formatDeadline } from "@/lib/tournament";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -52,45 +63,85 @@ function Index() {
 
   return (
     <div className="relative">
-      {/* HERO */}
-      <section className="letterbox relative mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-white/5 bg-black/30 px-4 pt-24 pb-28 sm:px-10 sm:pt-32 sm:pb-36">
-        <div className="sprocket pointer-events-none absolute left-0 right-0 top-14 h-3 opacity-60" />
-        <div className="sprocket pointer-events-none absolute left-0 right-0 bottom-14 h-3 opacity-60" />
+      <section className="hero-frame relative -mt-[72px] overflow-hidden px-4 pb-12 pt-28 sm:px-6 lg:pb-16 lg:pt-36">
+        <div className="sprocket pointer-events-none absolute left-0 right-0 top-[92px] h-3 opacity-45" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background to-transparent" />
 
-        <div className="mx-auto max-w-3xl text-center animate-fade-up">
-          <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-            <Trophy className="h-3.5 w-3.5 text-accent" />
-            {t("hero_kicker")}
-          </span>
-          <h1 className="mt-6 font-display text-5xl leading-[1.02] sm:text-7xl">
-            <span className="text-gradient">{t("hero_title_a")}</span>
-            <br />
-            <em className="font-serif italic font-normal text-foreground/90">{t("hero_title_b")}</em>
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl font-serif text-lg italic text-muted-foreground sm:text-xl">
-            {t("hero_sub")}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild variant="hero" size="xl" className="animate-pulse-neon">
-              <Link to="/signup">
-                <Upload className="h-5 w-5" />
-                {t("hero_cta_join")}
-              </Link>
-            </Button>
-            <Button asChild variant="neon" size="xl">
-              <Link to="/explore">
-                <Play className="h-5 w-5" />
-                {t("hero_cta_explore")}
-              </Link>
-            </Button>
+        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-end">
+          <div className="animate-fade-up max-w-3xl pb-8">
+            <span className="eyebrow">
+              <Trophy className="h-3.5 w-3.5 text-accent" />
+              {t("hero_kicker")}
+            </span>
+            <h1 className="mt-6 max-w-4xl font-display text-5xl leading-[1.02] sm:text-7xl lg:text-8xl">
+              <span className="text-gradient">{t("hero_title_a")}</span>
+              <br />
+              <em className="font-serif italic font-normal text-foreground/95">
+                {t("hero_title_b")}
+              </em>
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl">
+              {t("hero_sub")} Команды снимают короткий метр, проходят отбор и борются за призовой фонд.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Button asChild variant="hero" size="xl">
+                <Link to="/signup">
+                  <Upload className="h-5 w-5" />
+                  {t("hero_cta_join")}
+                </Link>
+              </Button>
+              <Button asChild variant="neon" size="xl">
+                <Link to="/tournament">
+                  <Play className="h-5 w-5" />
+                  Правила турнира
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+            <HeroMetric label="Призовой фонд" value={t("ti_prize_amount")} />
+            <HeroMetric label="Команда" value="3-7 человек" />
+            <HeroMetric label="Хронометраж" value="5-12 минут" />
+            <HeroMetric label="Дедлайн" value={formatDeadline("ru")} />
           </div>
         </div>
       </section>
 
-      {/* TOURNAMENT INFO GRID */}
-      <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6">
+      <section className="mx-auto grid max-w-7xl gap-4 px-4 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="surface reveal p-6 sm:p-8">
+          <span className="eyebrow">
+            <Trophy className="h-3.5 w-3.5 text-accent" />
+            YCT 2026
+          </span>
+          <h2 className="mt-4 max-w-2xl font-display text-3xl leading-tight sm:text-5xl">
+            Турнир для команд, которые могут снять историю быстро, честно и выразительно.
+          </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+            YCT собирает начинающих авторов вокруг короткого формата: понятные правила, две темы,
+            дедлайн, модерация работ и публичный показ лучших фильмов.
+          </p>
+        </div>
+        <div className="surface reveal grid content-between gap-6 p-6 sm:p-8">
+          <div>
+            <p className="text-[11px] uppercase text-accent">Прием заявок</p>
+            <p className="mt-2 font-display text-2xl">{formatDeadline("ru")}</p>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              После дедлайна раздел с фильмами откроется для просмотра и отбора.
+            </p>
+          </div>
+          <Button asChild variant="glass" size="lg" className="justify-between">
+            <Link to="/upload">
+              Перейти к заявке
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <div className="mb-10 reveal">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-accent/80">YCT 2026</p>
+          <p className="text-[11px] uppercase text-accent/80">Основное</p>
           <h2 className="mt-2 font-display text-3xl sm:text-5xl">{t("ti_title")}</h2>
         </div>
 
@@ -111,10 +162,9 @@ function Index() {
           <InfoCard icon={Globe2} title={t("ti_sponsors")} body={t("ti_sponsors_body")} sponsors />
         </div>
 
-        {/* Regulations download */}
-        <div className="mt-6 glass flex flex-col items-start gap-4 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between reveal">
+        <div className="surface reveal mt-6 flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent/15 text-accent">
+            <span className="grid h-12 w-12 place-items-center bg-accent/15 text-accent">
               <FileDown className="h-5 w-5" />
             </span>
             <div>
@@ -128,37 +178,11 @@ function Index() {
         </div>
       </section>
 
-      {/* CTA: register / login */}
       <section className="mx-auto mt-20 max-w-7xl px-4 sm:px-6">
-        <div className="glass relative overflow-hidden rounded-3xl p-8 sm:p-14 reveal">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full [background:var(--gradient-primary)] opacity-20 blur-3xl" />
-          <div className="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+        <div className="surface reveal p-8 sm:p-12">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl">
-                <span className="text-gradient">{t("hero_cta_join")}</span>
-              </h2>
-              <p className="mt-2 max-w-xl font-serif italic text-muted-foreground">
-                {t("hero_sub")}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button asChild variant="hero" size="lg">
-                <Link to="/signup">{t("nav_submit")}</Link>
-              </Button>
-              <Button asChild variant="glass" size="lg">
-                <Link to="/login">{t("nav_login")}</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TOURNAMENT CREATORS */}
-      <section className="mx-auto mt-20 max-w-7xl px-4 sm:px-6">
-        <div className="glass relative overflow-hidden rounded-3xl p-8 sm:p-14 reveal">
-          <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+              <span className="eyebrow">
                 <Trophy className="h-3.5 w-3.5 text-accent" />
                 {t("tc_kicker")}
               </span>
@@ -171,21 +195,15 @@ function Index() {
               </p>
             </div>
             <div className="grid gap-4 self-center">
-              <div className="glass flex items-start gap-4 rounded-2xl p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
-                  <Snowflake className="h-5 w-5" />
-                </span>
+              <div className="border-l border-white/10 pl-5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-accent/80">{t("tc_winter_kicker")}</p>
+                  <p className="text-[10px] uppercase text-accent/80">{t("tc_winter_kicker")}</p>
                   <h3 className="mt-1 font-display text-lg">{t("tc_winter_title")}</h3>
                 </div>
               </div>
-              <div className="glass flex items-start gap-4 rounded-2xl p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/20 text-primary-foreground">
-                  <Sun className="h-5 w-5" />
-                </span>
+              <div className="border-l border-white/10 pl-5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-accent/80">{t("tc_summer_kicker")}</p>
+                  <p className="text-[10px] uppercase text-accent/80">{t("tc_summer_kicker")}</p>
                   <h3 className="mt-1 font-display text-lg flex items-center gap-2">
                     {t("tc_summer_title")} <Globe2 className="h-4 w-4 text-accent" />
                   </h3>
@@ -196,14 +214,16 @@ function Index() {
         </div>
       </section>
 
-      {/* FEATURED submitted films */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32">
         <div className="mb-10 flex items-end justify-between reveal">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.3em] text-accent/80">{t("featured_kicker")}</p>
+            <p className="text-[11px] uppercase text-accent/80">{t("featured_kicker")}</p>
             <h2 className="mt-2 font-display text-3xl sm:text-5xl">{t("nav_explore")}</h2>
           </div>
-          <Link to="/explore" className="text-sm text-accent hover:underline">→</Link>
+          <Link to="/explore" className="inline-flex items-center gap-2 text-sm text-accent hover:underline">
+            Открыть
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         {films && films.length > 0 ? (
@@ -215,12 +235,23 @@ function Index() {
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-12 text-center reveal">
+          <div className="surface reveal p-12 text-center">
             <FilmIcon className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="mt-4 font-serif italic text-muted-foreground">—</p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Фильмы появятся после модерации и открытия раздела.
+            </p>
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="metric">
+      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+      <p className="mt-1 font-display text-lg text-foreground">{value}</p>
     </div>
   );
 }
@@ -236,18 +267,18 @@ function InfoCard({
   sponsors?: boolean;
 }) {
   return (
-    <div className="reveal glass rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[var(--shadow-neon)]">
+    <div className="surface reveal p-6 transition-all duration-500 hover:-translate-y-1">
       <Icon className={`h-6 w-6 ${accent ? "text-accent" : "text-foreground/80"}`} />
-      <p className="mt-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{title}</p>
+      <p className="mt-3 text-[10px] uppercase text-muted-foreground">{title}</p>
       {big ? (
         <p className={`mt-2 font-display text-3xl ${accent ? "text-gradient" : ""}`}>{body}</p>
       ) : (
-        <p className="mt-2 font-serif italic text-sm text-muted-foreground">{body}</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
       )}
       {sponsors && (
         <div className="mt-4 grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[3/2] rounded-md border border-dashed border-white/10 bg-white/[0.02]" />
+            <div key={i} className="aspect-[3/2] border border-dashed border-white/10 bg-white/[0.02]" />
           ))}
         </div>
       )}

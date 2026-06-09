@@ -1,13 +1,9 @@
 export function CinematicDecor() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/* Soft warm orbs */}
-      <div className="absolute -top-24 left-1/4 h-80 w-80 rounded-full bg-primary/15 blur-3xl animate-flicker" />
-      <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
-
       {/* Top-right film strip */}
       <svg
-        className="absolute -right-10 top-24 h-80 w-44 opacity-[0.18] animate-float"
+        className="absolute -right-10 top-24 h-80 w-44 opacity-[0.10] animate-float"
         viewBox="0 0 100 220"
         fill="none"
       >
@@ -34,7 +30,7 @@ export function CinematicDecor() {
 
       {/* Bottom-left clapperboard */}
       <svg
-        className="absolute -bottom-8 -left-8 h-72 w-72 opacity-[0.10]"
+        className="absolute -bottom-8 -left-8 h-72 w-72 opacity-[0.07]"
         viewBox="0 0 200 200"
         fill="none"
       >
