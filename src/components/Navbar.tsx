@@ -27,11 +27,11 @@ export function Navbar() {
   ];
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-40 w-full rounded-b-[15px] border-b border-gray-700/30 bg-[#0d0d18]/30 backdrop-blur-md">
-      <div className="container mx-auto px-4 py-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+    <header className="pointer-events-none fixed left-0 right-0 top-0 z-40 w-full px-3 pt-3 sm:px-6">
+      <div className="pointer-events-auto mx-auto max-w-7xl rounded-full border border-white/10 bg-[#0d0d18]/55 px-4 py-3 shadow-[0_24px_80px_-42px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:px-5">
+        <div className="flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
-            <span className="grid h-8 w-8 place-items-center rounded-full text-white">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-white/8 text-white">
               <Film className="h-4 w-4 text-white" />
             </span>
             <span className="text-white">YCT</span>
@@ -87,10 +87,14 @@ export function Navbar() {
             )}
           </nav>
 
-          <div className="flex items-center gap-3 md:gap-5">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1 rounded-full px-2 text-gray-300">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 rounded-full px-2 text-gray-300 hover:bg-white/8"
+                >
                   <Languages className="h-4 w-4" />
                   <span className="text-xs uppercase">{lang}</span>
                 </Button>
@@ -133,7 +137,7 @@ export function Navbar() {
                 asChild
                 variant="glass"
                 size="sm"
-                className="rounded-full border-[#322D36] bg-[#8200DB29] px-5 font-semibold text-white hover:bg-black/50"
+                className="rounded-full border-[#322D36] bg-[#8200DB29] px-4 font-semibold text-white hover:bg-black/50 sm:px-5"
               >
                 <Link to="/login">
                   <LogIn className="h-4 w-4" /> {t("nav_login")}
