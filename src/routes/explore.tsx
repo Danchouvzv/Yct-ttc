@@ -2,16 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Film, X, Clapperboard, CalendarClock, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { FilmCard } from "@/components/FilmCard";
 import { useReveal } from "@/hooks/use-reveal";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import {
-  isSubmissionsOpen,
-  formatDeadline,
-  timeUntilDeadline,
-} from "@/lib/tournament";
+import { isSubmissionsOpen, formatDeadline, timeUntilDeadline } from "@/lib/tournament";
 
 export const Route = createFileRoute("/explore")({
   component: Explore,
@@ -43,7 +39,8 @@ function ComingSoon() {
           <em className="font-serif italic font-normal">скоро откроется</em>
         </h1>
         <p className="mx-auto mt-5 max-w-xl font-serif italic text-muted-foreground">
-          Раздел с фильмами откроется после окончания приёма заявок. А пока — соберите команду и подайте свою.
+          Раздел с фильмами откроется после окончания приёма заявок. А пока — соберите команду и
+          подайте свою.
         </p>
 
         <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3">
@@ -89,6 +86,7 @@ function FilmsList() {
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["films-all"],
+    enabled: hasSupabaseConfig,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("films")
@@ -122,8 +120,12 @@ function FilmsList() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="mb-8 reveal">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-accent/80">{t("explore_kicker")}</p>
-        <h1 className="mt-2 font-display text-4xl sm:text-5xl text-gradient">{t("explore_title")}</h1>
+        <p className="text-[11px] uppercase tracking-[0.3em] text-accent/80">
+          {t("explore_kicker")}
+        </p>
+        <h1 className="mt-2 font-display text-4xl sm:text-5xl text-gradient">
+          {t("explore_title")}
+        </h1>
         <p className="mt-2 font-serif italic text-muted-foreground">{t("explore_sub")}</p>
       </div>
 

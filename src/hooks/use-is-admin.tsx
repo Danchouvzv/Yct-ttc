@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 
 export function useIsAdmin() {
   const { user, loading } = useAuth();
   const { data, isLoading } = useQuery({
-    enabled: !!user,
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["is-admin", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase

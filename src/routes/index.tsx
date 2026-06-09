@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { FilmCard } from "@/components/FilmCard";
 import { useReveal } from "@/hooks/use-reveal";
 import { useI18n } from "@/i18n";
@@ -26,7 +26,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "YCT — International Film Tournament" },
-      { name: "description", content: "International short-film tournament. Build a team, shoot a film, win the prize." },
+      {
+        name: "description",
+        content: "International short-film tournament. Build a team, shoot a film, win the prize.",
+      },
     ],
   }),
 });
@@ -37,6 +40,7 @@ function Index() {
 
   const { data: films } = useQuery({
     queryKey: ["films-featured"],
+    enabled: hasSupabaseConfig,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("films")
@@ -52,6 +56,7 @@ function Index() {
 
   const { data: teamCount } = useQuery({
     queryKey: ["team-count"],
+    enabled: hasSupabaseConfig,
     queryFn: async () => {
       const { count } = await supabase
         .from("profiles")
@@ -81,7 +86,8 @@ function Index() {
               </em>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl">
-              {t("hero_sub")} Команды снимают короткий метр, проходят отбор и борются за призовой фонд.
+              {t("hero_sub")} Команды снимают короткий метр, проходят отбор и борются за призовой
+              фонд.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Button asChild variant="hero" size="xl">
@@ -148,12 +154,7 @@ function Index() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <InfoCard icon={Sparkles} title={t("ti_themes")} body={t("ti_themes_body")} />
           <InfoCard icon={Users} title={t("ti_who")} body={t("ti_who_body")} />
-          <InfoCard
-            icon={Trophy}
-            title={t("ti_teams")}
-            body={`${teamCount ?? 0}`}
-            big
-          />
+          <InfoCard icon={Trophy} title={t("ti_teams")} body={`${teamCount ?? 0}`} big />
           <InfoCard icon={Coins} title={t("ti_prize")} body={t("ti_prize_amount")} big accent />
           <InfoCard icon={Clapperboard} title={t("ti_format")} body={t("ti_format_body")} />
           <InfoCard icon={Sparkles} title={t("ti_bonus")} body={t("ti_bonus_body")} />
@@ -188,7 +189,9 @@ function Index() {
               </span>
               <h2 className="mt-5 font-display text-4xl leading-tight sm:text-5xl">
                 <span className="text-gradient">{t("tc_title_a")}</span>{" "}
-                <em className="font-serif italic font-normal text-foreground/90">{t("tc_title_b")}</em>
+                <em className="font-serif italic font-normal text-foreground/90">
+                  {t("tc_title_b")}
+                </em>
               </h2>
               <p className="mt-5 max-w-xl font-serif text-lg italic text-muted-foreground">
                 {t("tc_sub")}
@@ -220,7 +223,10 @@ function Index() {
             <p className="text-[11px] uppercase text-accent/80">{t("featured_kicker")}</p>
             <h2 className="mt-2 font-display text-3xl sm:text-5xl">{t("nav_explore")}</h2>
           </div>
-          <Link to="/explore" className="inline-flex items-center gap-2 text-sm text-accent hover:underline">
+          <Link
+            to="/explore"
+            className="inline-flex items-center gap-2 text-sm text-accent hover:underline"
+          >
             Открыть
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -257,7 +263,12 @@ function HeroMetric({ label, value }: { label: string; value: string }) {
 }
 
 function InfoCard({
-  icon: Icon, title, body, big, accent, sponsors,
+  icon: Icon,
+  title,
+  body,
+  big,
+  accent,
+  sponsors,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
@@ -278,7 +289,10 @@ function InfoCard({
       {sponsors && (
         <div className="mt-4 grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[3/2] border border-dashed border-white/10 bg-white/[0.02]" />
+            <div
+              key={i}
+              className="aspect-[3/2] border border-dashed border-white/10 bg-white/[0.02]"
+            />
           ))}
         </div>
       )}
