@@ -1,0 +1,482 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { z } from "zod";
+import { toast } from "sonner";
+import { UploadCloud, Image as ImageIcon, FileText, Send, Save, Plus, Trash2, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
+
+const MIN_DURATION_SECONDS = 5 * 60;   // 5 minutes
+const MAX_DURATION_SECONDS = 12 * 60;  // 12 minutes
+const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
+
+export const Route = createFileRoute("/upload")({
+  component: SubmitPage,
+  head: () => ({ meta: [{ title: "Submit — YCT" }] }),
+});
+
+type Participant = {
+  full_name: string;
+  email: string;
+  dob: string;
+  role: string;
+};
+
+const emptyP: Participant = { full_name: "", email: "", dob: "", role: "" };
+
+const participantSchema = z.object({
+  full_name: z.string().trim().min(2).max(120),
+  email: z.string().email().max(255),
+  dob: z.string().min(4),
+  role: z.string().trim().min(2).max(120),
+});
+
+function SubmitPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useI18n();
+
+  const videoRef = useRef<HTMLInputElement>(null);
+  const thumbRef = useRef<HTMLInputElement>(null);
+  const docRef = useRef<HTMLInputElement>(null);
+
+  const [video, setVideo] = useState<File | null>(null);
+  const [duration, setDuration] = useState<number | null>(null);
+  const [durationStatus, setDurationStatus] = useState<"ok" | "too-short" | "too-long" | null>(null);
+  const [thumb, setThumb] = useState<File | null>(null);
+  const [doc, setDoc] = useState<File | null>(null);
+
+  const [title, setTitle] = useState("");
+  const [theme, setTheme] = useState<"theme_1" | "theme_2" | "">("");
+  const [description, setDescription] = useState("");
+  const [genres, setGenres] = useState("");
+  const [conditions, setConditions] = useState("");
+  const [reach, setReach] = useState("");
+  const [connect, setConnect] = useState("");
+
+  const [participants, setParticipants] = useState<Participant[]>([
+    { ...emptyP }, { ...emptyP }, { ...emptyP },
+  ]);
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [loading, user, navigate]);
+
+  const formatDuration = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = String(sec % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const onPickVideo = (file: File | null) => {
+    setVideo(file);
+    setDuration(null);
+    setDurationStatus(null);
+    if (!file) return;
+
+    if (file.size > MAX_VIDEO_SIZE_BYTES) {
+      toast.error("Файл слишком большой. Максимум 2 ГБ.");
+      setVideo(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.src = url;
+    v.onloadedmetadata = () => {
+      const dur = Math.round(v.duration);
+      setDuration(dur);
+      URL.revokeObjectURL(url);
+
+      if (dur < MIN_DURATION_SECONDS) {
+        setDurationStatus("too-short");
+      } else if (dur > MAX_DURATION_SECONDS) {
+        setDurationStatus("too-long");
+      } else {
+        setDurationStatus("ok");
+      }
+    };
+    v.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast.error("Не удалось определить длительность видео");
+    };
+  };
+
+  const updateParticipant = (i: number, key: keyof Participant, value: string) => {
+    setParticipants((arr) => arr.map((p, idx) => (idx === i ? { ...p, [key]: value } : p)));
+  };
+
+  const addParticipant = () => {
+    if (participants.length >= 7) return;
+    setParticipants([...participants, { ...emptyP }]);
+  };
+
+  const removeParticipant = (i: number) => {
+    if (i < 3) return; // first 3 required
+    setParticipants(participants.filter((_, idx) => idx !== i));
+  };
+
+  const submit = async (asDraft: boolean) => {
+    if (!user) return;
+
+    if (!asDraft) {
+      if (!video) return toast.error(t("sub_video"));
+      if (!title.trim()) return toast.error(t("sub_film_title"));
+      if (!theme) return toast.error(t("sub_theme"));
+      if (durationStatus === "too-short") return toast.error(t("sub_err_duration_min"));
+      if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
+
+      // first 3 participants required
+      for (let i = 0; i < 3; i++) {
+        const p = participantSchema.safeParse(participants[i]);
+        if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
+        // Check DOB: must be born up to 2003 inclusive
+        const dobYear = new Date(participants[i].dob).getFullYear();
+        if (!isNaN(dobYear) && dobYear > 2003) {
+          return toast.error(`#${i + 1}: год рождения должен быть ≤ 2003`);
+        }
+      }
+      // optional: validate the rest if any field filled
+      for (let i = 3; i < participants.length; i++) {
+        const has = Object.values(participants[i]).some((v) => v.trim());
+        if (has) {
+          const p = participantSchema.safeParse(participants[i]);
+          if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
+          const dobYear = new Date(participants[i].dob).getFullYear();
+          if (!isNaN(dobYear) && dobYear > 2003) {
+            return toast.error(`#${i + 1}: год рождения должен быть ≤ 2003`);
+          }
+        }
+      }
+    }
+
+    setBusy(true);
+    setProgress(5);
+
+    let videoPath: string | null = null;
+    let thumbPath: string | null = null;
+    let docPath: string | null = null;
+    const ts = Date.now();
+
+    try {
+      // Re-check session right before upload — RLS rejects without a valid bearer
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error("Сессия истекла. Войдите снова.");
+      }
+
+      if (video) {
+        const ext = (video.name.split(".").pop() ?? "mp4").toLowerCase();
+        videoPath = `${user.id}/${ts}.${ext}`;
+        const { error } = await supabase.storage
+          .from("films")
+          .upload(videoPath, video, { contentType: video.type || "video/mp4", upsert: true });
+        if (error) {
+          console.error("[submit] video upload failed", error);
+          throw new Error("Видео: " + error.message);
+        }
+        setProgress(50);
+      }
+
+      if (thumb) {
+        const ext = (thumb.name.split(".").pop() ?? "jpg").toLowerCase();
+        thumbPath = `${user.id}/${ts}.${ext}`;
+        const { error } = await supabase.storage
+          .from("thumbs")
+          .upload(thumbPath, thumb, { contentType: thumb.type || "image/jpeg", upsert: true });
+        if (error) {
+          console.error("[submit] thumb upload failed", error);
+          throw new Error("Обложка: " + error.message);
+        }
+        setProgress(70);
+      }
+
+      if (doc) {
+        if (doc.size > 10 * 1024 * 1024) throw new Error("PDF > 10MB");
+        const ext = (doc.name.split(".").pop() ?? "pdf").toLowerCase();
+        docPath = `${user.id}/${ts}.${ext}`;
+        const { error } = await supabase.storage
+          .from("portfolios")
+          .upload(docPath, doc, { contentType: doc.type || "application/pdf", upsert: true });
+        if (error) {
+          console.error("[submit] portfolio upload failed", error);
+          throw new Error("Портфолио: " + error.message);
+        }
+        setProgress(85);
+      }
+
+      const tagArr = genres.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 12);
+
+      if (!videoPath) {
+        toast.warning("Загрузите видео перед отправкой");
+        setBusy(false);
+        return;
+      }
+
+      const payload = {
+        user_id: user.id,
+        title: title.trim() || "Draft",
+        description: description.trim() || null,
+        theme: theme || null,
+        // Store in both `genres` (tournament logic) and `tags` (UI display / explore filter)
+        genres: tagArr,
+        tags: tagArr,
+        conditions_log: conditions.trim() || null,
+        portfolio_reach: reach.trim() || null,
+        portfolio_connect: connect.trim() || null,
+        portfolio_doc_path: docPath,
+        participants: participants.filter((p) => Object.values(p).some((v) => v.trim())),
+        video_path: videoPath,
+        thumb_path: thumbPath,
+        duration_seconds: duration,
+        submitted: !asDraft,
+        submitted_at: asDraft ? null : new Date().toISOString(),
+        status: "pending" as const,
+      };
+
+      const { data: inserted, error: iErr } = await supabase
+        .from("films")
+        .insert(payload)
+        .select("id")
+        .single();
+
+      if (iErr) {
+        console.error("[submit] films insert failed", iErr, payload);
+        throw new Error("База: " + iErr.message);
+      }
+
+      setProgress(100);
+      if (asDraft) {
+        toast.success("Черновик сохранён");
+        navigate({ to: "/watch/$id", params: { id: inserted.id } });
+      } else {
+        toast.success("Заявка отправлена и ждёт модерации администратора", { duration: 6000 });
+        navigate({ to: "/dashboard" });
+      }
+    } catch (err) {
+      console.error("[submit] failed", err);
+      const msg = err instanceof Error ? err.message : "Ошибка отправки";
+      toast.error(msg, { duration: 8000 });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <h1 className="font-display text-4xl text-gradient">{t("sub_title")}</h1>
+
+      <form
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          submit(false);
+        }}
+        className="mt-10 space-y-10"
+      >
+        {/* SECTION: FILM */}
+        <Section title={t("sub_film")}>
+          {/* Video */}
+          <div
+            onClick={() => videoRef.current?.click()}
+            className={`glass cursor-pointer rounded-3xl border-dashed p-8 text-center transition-all hover:shadow-[var(--shadow-neon)] ${
+              durationStatus === "ok"
+                ? "border-green-400/40"
+                : durationStatus === "too-short" || durationStatus === "too-long"
+                ? "border-destructive/40"
+                : ""
+            }`}
+            style={{ borderStyle: "dashed", borderWidth: 1 }}
+          >
+            <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={(e) => onPickVideo(e.target.files?.[0] ?? null)} />
+            {durationStatus === "ok" ? (
+              <CheckCircle2 className="mx-auto h-9 w-9 text-green-400" />
+            ) : durationStatus === "too-short" || durationStatus === "too-long" ? (
+              <AlertCircle className="mx-auto h-9 w-9 text-destructive" />
+            ) : (
+              <UploadCloud className="mx-auto h-9 w-9 text-accent" />
+            )}
+            <p className="mt-3 font-display text-lg">{video ? video.name : t("sub_video")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("sub_video_hint")}</p>
+            {duration !== null && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm">
+                <Clock className="h-3.5 w-3.5 text-accent" />
+                <span className={durationStatus === "ok" ? "text-green-400" : durationStatus === "too-short" || durationStatus === "too-long" ? "text-destructive" : "text-foreground"}>
+                  {formatDuration(duration)}
+                </span>
+                {durationStatus === "ok" && <span className="text-green-400/80 text-xs">✓ OK</span>}
+                {durationStatus === "too-short" && <span className="text-destructive text-xs">— слишком короткое</span>}
+                {durationStatus === "too-long" && <span className="text-destructive text-xs">— слишком длинное</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Thumb */}
+          <div
+            onClick={() => thumbRef.current?.click()}
+            className="glass flex cursor-pointer items-center gap-4 rounded-2xl p-4 hover:bg-white/10"
+          >
+            <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} />
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5">
+              <ImageIcon className="h-5 w-5 text-accent" />
+            </span>
+            <p className="text-sm">{thumb ? thumb.name : t("sub_thumb")}</p>
+          </div>
+
+          <Input label={t("sub_film_title")} value={title} onChange={setTitle} />
+
+          <div>
+            <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{t("sub_theme")}</span>
+            <div className="grid grid-cols-2 gap-3">
+              {(["theme_1", "theme_2"] as const).map((th) => (
+                <button
+                  type="button"
+                  key={th}
+                  onClick={() => setTheme(th)}
+                  className={`rounded-xl border p-4 text-left transition-all ${
+                    theme === th
+                      ? "border-[var(--neon)] bg-white/10 shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon)_18%,transparent)]"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                >
+                  <p className="font-display">{t(th === "theme_1" ? "sub_theme_1" : "sub_theme_2")}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Textarea label={t("sub_desc")} value={description} onChange={setDescription} rows={4} />
+          <Input label={t("sub_genres")} value={genres} onChange={setGenres} placeholder="drama, noir, doc" />
+          <Textarea
+            label={t("sub_conditions")}
+            value={conditions}
+            onChange={setConditions}
+            placeholder={t("sub_conditions_ph")}
+            rows={5}
+          />
+        </Section>
+
+        {/* SECTION: PORTFOLIO */}
+        <Section title={t("sub_portfolio")}>
+          <Textarea label={t("sub_reach")} value={reach} onChange={setReach} rows={4} />
+          <Textarea label={t("sub_connect")} value={connect} onChange={setConnect} rows={4} />
+
+          <div
+            onClick={() => docRef.current?.click()}
+            className="glass flex cursor-pointer items-center gap-4 rounded-2xl p-4 hover:bg-white/10"
+          >
+            <input ref={docRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => setDoc(e.target.files?.[0] ?? null)} />
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5">
+              <FileText className="h-5 w-5 text-accent" />
+            </span>
+            <p className="text-sm">{doc ? doc.name : t("sub_doc")}</p>
+          </div>
+        </Section>
+
+        {/* SECTION: PARTICIPANTS */}
+        <Section title={t("sub_participants")} hint={t("sub_participants_hint")}>
+          <div className="space-y-4">
+            {participants.map((p, i) => (
+              <div key={i} className="glass rounded-2xl p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                    #{i + 1} · {i < 3 ? t("sub_required") : t("sub_optional")}
+                  </span>
+                  {i >= 3 && (
+                    <button type="button" onClick={() => removeParticipant(i)} className="text-muted-foreground hover:text-foreground">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input label={t("sub_p_name")} value={p.full_name} onChange={(v) => updateParticipant(i, "full_name", v)} />
+                  <Input label={t("sub_p_email")} value={p.email} onChange={(v) => updateParticipant(i, "email", v)} type="email" />
+                  <Input label={t("sub_p_dob")} value={p.dob} onChange={(v) => updateParticipant(i, "dob", v)} type="date" />
+                  <Input label={t("sub_p_role")} value={p.role} onChange={(v) => updateParticipant(i, "role", v)} />
+                </div>
+              </div>
+            ))}
+            {participants.length < 7 && (
+              <Button type="button" variant="glass" size="lg" onClick={addParticipant} className="w-full">
+                <Plus className="h-4 w-4" /> +
+              </Button>
+            )}
+          </div>
+        </Section>
+
+        {busy && (
+          <div className="h-2 overflow-hidden rounded-full bg-white/5">
+            <div className="h-full [background:var(--gradient-primary)] transition-all" style={{ width: `${progress}%` }} />
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button type="button" variant="glass" size="xl" className="flex-1" disabled={busy} onClick={() => submit(true)}>
+            <Save className="h-5 w-5" /> {t("sub_save_draft")}
+          </Button>
+          <Button
+            type="submit"
+            variant="hero"
+            size="xl"
+            className="flex-1"
+            disabled={busy || (durationStatus !== null && durationStatus !== "ok")}
+          >
+            <Send className="h-5 w-5" /> {busy ? t("sub_sending") : t("sub_send")}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="font-display text-2xl text-gradient">{title}</h2>
+        {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Input({
+  label, value, onChange, placeholder, type = "text",
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-[var(--neon)] focus:bg-white/10 focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon)_18%,transparent)]"
+      />
+    </label>
+  );
+}
+
+function Textarea({
+  label, value, onChange, placeholder, rows = 4,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-[var(--neon)] focus:bg-white/10 focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon)_18%,transparent)]"
+      />
+    </label>
+  );
+}
