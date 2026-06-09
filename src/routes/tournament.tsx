@@ -7,10 +7,8 @@ import {
   Globe2,
   Instagram,
   Award,
-  ShieldCheck,
   Languages,
   CalendarClock,
-  FileText,
   ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +29,7 @@ export const Route = createFileRoute("/tournament")({
       {
         property: "og:description",
         content:
-          "Команда 3–7 человек, фильм 5–16 минут, две темы, призовой фонд и три награды: Impact, Composition, Tech.",
+          "Команда 3–7 человек, фильм 5–16 минут, две темы, призовой фонд и четыре направления: Glorious, Impact, Visual, Tech.",
       },
     ],
   }),
@@ -131,70 +129,43 @@ function TournamentPage() {
           </div>
         </Section>
 
-        <Section icon={ShieldCheck} title="Отбор фильмов">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-accent/80">Этап 1</p>
-              <p className="mt-2 font-serif italic text-foreground/85">
-                Первичный просмотр и отбор общей комиссией турнира.
-              </p>
-            </Card>
-            <Card>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-accent/80">Этап 2</p>
-              <p className="mt-2 font-serif italic text-foreground/85">
-                Лучшие фильмы передаются профессиональным режиссёрам, экспертам киноиндустрии и
-                профильным специалистам для финального оценивания.
-              </p>
-            </Card>
+        <Section icon={ListChecks} title="Этапы турнира">
+          <div className="grid gap-4">
+            <StageCard
+              idx="01"
+              title="Проверочный этап"
+              body="Оргкомитет проверяет заявки и фильмы на соответствие требованиям. На этом этапе отсеиваются работы, не прошедшие модерацию, и определяются до 99 команд, которые проходят на зрительское голосование. Также на этом этапе определяются призёры наград Connect и Reach."
+            />
+            <StageCard
+              idx="02"
+              title="Зрительское голосование"
+              body="Фильмы, прошедшие проверку, распределяются по дивизионам. Каждый дивизион смотрит отдельная группа зрителей, после чего они заполняют оценочный бланк и выбирают претендентов на кинонаграды. По итогам голосования фильмы с наибольшим количеством баллов в своих направлениях становятся номинантами на соответствующие награды."
+            />
+            <StageCard
+              idx="03"
+              title="Финальный этап"
+              body="Финал оценивает жюри. Фильмы соревнуются внутри своих направлений: Glorious award, Impact award, Visual award, Tech award. В каждом направлении награждаются три команды, набравшие наибольшее количество баллов."
+            />
           </div>
-        </Section>
-
-        <Section icon={FileText} title="Требования к заявке">
-          <Bullet>
-            Название команды <b>на английском языке</b>.
-          </Bullet>
-          <Bullet>
-            Фильм: снят на одну из двух тем; продолжительность <b>5–16 минут</b>; язык — казахский,
-            русский или английский; без сторонних брендов и скрытой рекламы (допускаются спонсоры
-            турнира).
-          </Bullet>
-          <Bullet>
-            Название фильма на <b>оригинальном языке и на английском</b>.
-          </Bullet>
-          <Bullet>
-            Краткое описание фильма <b>до 75 слов</b>.
-          </Bullet>
-          <Bullet>
-            До <b>3 жанров</b>.
-          </Bullet>
-          <Bullet>
-            Описание деятельности команды в рамках Connect & Reach —{" "}
-            <b>50–150 слов на каждую награду</b>.
-          </Bullet>
-          <Bullet>
-            Портфолио до <b>3 страниц A4</b>.
-          </Bullet>
-          <Bullet>
-            Полный список участников с ролями: режиссёр, оператор, монтажёр, актёр, другие роли.
-            Дополнительно <b>до 10 помощников</b>. Все имена и фамилии — <b>латиницей</b>.
-          </Bullet>
         </Section>
 
         <Section icon={Award} title="Порядок предпочтительных кинонаград">
           <p className="text-sm text-foreground/85">
-            Команда указывает порядок приоритета для трёх наград:
+            Команда указывает порядок приоритета для четырёх наград:
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <NomCard idx="01" name="Impact Award" />
-            <NomCard idx="02" name="Composition Award" />
-            <NomCard idx="03" name="Tech Award" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <NomCard idx="01" name="Glorious Award" />
+            <NomCard idx="02" name="Impact Award" />
+            <NomCard idx="03" name="Visual Award" />
+            <NomCard idx="04" name="Tech Award" />
           </div>
           <div className="mt-6 glass rounded-2xl p-5 text-sm">
             <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Пример</p>
             <ol className="mt-2 list-decimal pl-5 text-foreground/90">
-              <li>Tech Award</li>
+              <li>Glorious Award</li>
               <li>Impact Award</li>
-              <li>Composition Award</li>
+              <li>Visual Award</li>
+              <li>Tech Award</li>
             </ol>
           </div>
         </Section>
@@ -271,6 +242,16 @@ function Bullet({ children }: { children: React.ReactNode }) {
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="glass rounded-2xl p-5">{children}</div>;
+}
+
+function StageCard({ idx, title, body }: { idx: string; title: string; body: string }) {
+  return (
+    <Card>
+      <p className="text-[11px] uppercase tracking-[0.25em] text-accent/80">Этап {idx}</p>
+      <h3 className="mt-2 font-display text-xl">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-foreground/85">{body}</p>
+    </Card>
+  );
 }
 
 function NomCard({ idx, name }: { idx: string; name: string }) {

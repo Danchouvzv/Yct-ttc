@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FilmCard } from "@/components/FilmCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
@@ -40,8 +40,12 @@ function Dashboard() {
     if (!loading && !user) navigate({ to: "/login" });
   }, [loading, user, navigate]);
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    enabled: !!user,
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    isError: profileError,
+  } = useQuery({
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -54,8 +58,13 @@ function Dashboard() {
     },
   });
 
-  const { data: films, isLoading: filmsLoading } = useQuery({
-    enabled: !!user,
+  const {
+    data: films,
+    isLoading: filmsLoading,
+    isError: filmsError,
+    refetch: refetchFilms,
+  } = useQuery({
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["my-films", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -69,7 +78,7 @@ function Dashboard() {
   });
 
   const { data: saved, isLoading: savedLoading } = useQuery({
-    enabled: !!user,
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["saved-films", user?.id],
     queryFn: async () => {
       const { data: rows, error } = await supabase
@@ -86,7 +95,7 @@ function Dashboard() {
   });
 
   const { data: followers } = useQuery({
-    enabled: !!user,
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["my-followers", user?.id],
     queryFn: async () => {
       const { count } = await supabase
@@ -99,10 +108,22 @@ function Dashboard() {
 
   const totalViews = films?.reduce((s, f) => s + (f.views ?? 0), 0) ?? 0;
 
+  useEffect(() => {
+    if (!hasSupabaseConfig || !user?.id) return;
+    void refetchFilms();
+  }, [user?.id, refetchFilms]);
+
   const handleDelete = async (id: string, videoPath: string, thumbPath: string | null) => {
     if (!confirm("Удалить этот фильм?")) return;
-    await supabase.storage.from("films").remove([videoPath]).catch(() => null);
-    if (thumbPath) await supabase.storage.from("thumbs").remove([thumbPath]).catch(() => null);
+    await supabase.storage
+      .from("films")
+      .remove([videoPath])
+      .catch(() => null);
+    if (thumbPath)
+      await supabase.storage
+        .from("thumbs")
+        .remove([thumbPath])
+        .catch(() => null);
     const { error } = await supabase.from("films").delete().eq("id", id);
     if (error) {
       toast.error(error.message);
@@ -116,11 +137,25 @@ function Dashboard() {
 
   // Show skeleton while auth or initial data is loading — prevents content
   // flashing/disappearing on refresh.
-  if (loading || (user && (profileLoading || filmsLoading))) {
+  if (loading || (user && !profileError && !filmsError && (profileLoading || filmsLoading))) {
     return <DashboardSkeleton />;
   }
 
   if (!user) return null;
+
+  if (!hasSupabaseConfig) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
+        <div className="glass rounded-3xl p-10">
+          <FileText className="mx-auto h-10 w-10 text-muted-foreground" />
+          <h1 className="mt-4 font-display text-2xl">Кабинет временно недоступен</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Не настроены переменные Supabase для подключения к данным.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -154,15 +189,28 @@ function Dashboard() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 hover:text-accent"
                 >
-                  <Globe className="h-3.5 w-3.5 text-accent" /> {profile.website.replace(/^https?:\/\//, "")}
+                  <Globe className="h-3.5 w-3.5 text-accent" />{" "}
+                  {profile.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
             </div>
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <Stat icon={<FilmIcon className="h-4 w-4" />} label="Фильмов" value={films?.length ?? 0} />
+              <Stat
+                icon={<FilmIcon className="h-4 w-4" />}
+                label="Фильмов"
+                value={films?.length ?? 0}
+              />
               <Stat icon={<Eye className="h-4 w-4" />} label="Просмотров" value={totalViews} />
-              <Stat icon={<Users className="h-4 w-4" />} label="Подписчиков" value={followers ?? 0} />
-              <Stat icon={<Heart className="h-4 w-4" />} label="Автор с" value={new Date(user.created_at).getFullYear()} />
+              <Stat
+                icon={<Users className="h-4 w-4" />}
+                label="Подписчиков"
+                value={followers ?? 0}
+              />
+              <Stat
+                icon={<Heart className="h-4 w-4" />}
+                label="Автор с"
+                value={new Date(user.created_at).getFullYear()}
+              />
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
@@ -185,12 +233,26 @@ function Dashboard() {
 
       <ApplicationStatusBlock films={films ?? []} />
 
+      {(profileError || filmsError) && (
+        <div className="glass mb-8 rounded-2xl border-destructive/30 p-5 text-sm text-destructive">
+          Не удалось загрузить часть данных кабинета. Обновите страницу или попробуйте позже.
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="mb-6 flex items-center gap-2">
-        <TabButton active={tab === "library"} onClick={() => setTab("library")} icon={<FilmIcon className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "library"}
+          onClick={() => setTab("library")}
+          icon={<FilmIcon className="h-4 w-4" />}
+        >
           Моя библиотека
         </TabButton>
-        <TabButton active={tab === "saved"} onClick={() => setTab("saved")} icon={<Bookmark className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "saved"}
+          onClick={() => setTab("saved")}
+          icon={<Bookmark className="h-4 w-4" />}
+        >
           Сохранённые
         </TabButton>
       </div>
@@ -341,8 +403,16 @@ function ApplicationStatusBlock({ films }: { films: FilmRow[] }) {
   const status = app.status ?? "pending";
   const map: Record<string, { label: string; tone: string; icon: React.ReactNode }> = {
     pending: { label: "На модерации", tone: "text-amber-300", icon: <Clock className="h-4 w-4" /> },
-    approved: { label: "Принята", tone: "text-green-400", icon: <CheckCircle2 className="h-4 w-4" /> },
-    rejected: { label: "Отклонена", tone: "text-destructive", icon: <XCircle className="h-4 w-4" /> },
+    approved: {
+      label: "Принята",
+      tone: "text-green-400",
+      icon: <CheckCircle2 className="h-4 w-4" />,
+    },
+    rejected: {
+      label: "Отклонена",
+      tone: "text-destructive",
+      icon: <XCircle className="h-4 w-4" />,
+    },
   };
   const s = map[status] ?? map.pending;
   const isDraft = !app.submitted;
@@ -355,7 +425,9 @@ function ApplicationStatusBlock({ films }: { films: FilmRow[] }) {
             <FileText className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Моя заявка</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+              Моя заявка
+            </p>
             <p className="mt-1 font-display text-lg">{app.title}</p>
             <div className={`mt-2 inline-flex items-center gap-2 text-sm ${s.tone}`}>
               {s.icon} {isDraft ? "Черновик" : s.label}
@@ -375,7 +447,9 @@ function ApplicationStatusBlock({ films }: { films: FilmRow[] }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="glass" size="sm">
-            <Link to="/watch/$id" params={{ id: app.id }}>Открыть</Link>
+            <Link to="/watch/$id" params={{ id: app.id }}>
+              Открыть
+            </Link>
           </Button>
           {isDraft && (
             <Button asChild variant="hero" size="sm">

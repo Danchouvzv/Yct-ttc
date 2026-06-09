@@ -20,7 +20,7 @@ const D: Dict = {
     en: "International Film Tournament",
   },
   hero_title_a: { ru: "Каждый кадр —", kk: "Әр кадр —", en: "Every frame —" },
-  hero_title_b: { ru: "история на 12 минут", kk: "12 минуттық оқиға", en: "a 12-minute story" },
+  hero_title_b: { ru: "история на 16 минут", kk: "16 минуттық оқиға", en: "a 16-minute story" },
   hero_sub: {
     ru: "Соберите команду, снимите короткометражку и поборитесь за миллион.",
     kk: "Команда жинаңыз, қысқаметражды түсіріп, миллион үшін күресіңіз.",
@@ -49,9 +49,9 @@ const D: Dict = {
   ti_uploaded: { ru: "Загруженных фильмов", kk: "Жүктелген фильмдер", en: "Uploaded films" },
   ti_format: { ru: "Формат фильмов", kk: "Фильм форматы", en: "Film format" },
   ti_format_body: {
-    ru: "Горизонтальный кадр, хронометраж 5–15 минут.",
-    kk: "Көлденең кадр, ұзақтығы 5–15 минут.",
-    en: "Horizontal frame, 5–15 minutes runtime.",
+    ru: "Горизонтальный кадр, хронометраж 5–16 минут.",
+    kk: "Көлденең кадр, ұзақтығы 5–16 минут.",
+    en: "Horizontal frame, 5–16 minutes runtime.",
   },
   ti_ai: { ru: "Использование ИИ", kk: "ЖИ-ні қолдану", en: "AI usage" },
   ti_ai_body: {
@@ -112,9 +112,9 @@ const D: Dict = {
   },
   sub_video: { ru: "Видеофайл", kk: "Бейне файл", en: "Video file" },
   sub_video_hint: {
-    ru: "MP4 / MOV / WebM • 5–12 минут • макс. 2 ГБ",
-    kk: "MP4 / MOV / WebM • 5–12 минут • макс. 2 ГБ",
-    en: "MP4 / MOV / WebM • 5–12 minutes • max 2 GB",
+    ru: "MP4 / MOV / WebM • 5–16 минут • макс. 2 ГБ",
+    kk: "MP4 / MOV / WebM • 5–16 минут • макс. 2 ГБ",
+    en: "MP4 / MOV / WebM • 5–16 minutes • max 2 GB",
   },
   sub_thumb: {
     ru: "Обложка (необязательно)",
@@ -158,9 +158,9 @@ const D: Dict = {
     en: "Video is too short. Minimum 5 minutes.",
   },
   sub_err_duration_max: {
-    ru: "Видео слишком длинное. Максимум 12 минут.",
-    kk: "Бейне тым ұзын. Ең көбі 12 минут.",
-    en: "Video is too long. Maximum 12 minutes.",
+    ru: "Видео слишком длинное. Максимум 16 минут.",
+    kk: "Бейне тым ұзын. Ең көбі 16 минут.",
+    en: "Video is too long. Maximum 16 minutes.",
   },
 
   // team signup

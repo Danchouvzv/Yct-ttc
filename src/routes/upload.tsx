@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 
 const MIN_DURATION_SECONDS = 5 * 60; // 5 minutes
-const MAX_DURATION_SECONDS = 12 * 60; // 12 minutes
+const MAX_DURATION_SECONDS = 16 * 60; // 16 minutes
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
 
 export const Route = createFileRoute("/upload")({

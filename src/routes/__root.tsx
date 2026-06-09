@@ -15,9 +15,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl text-gradient">404</h1>
         <h2 className="mt-4 text-xl font-semibold">Кадр не найден</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Этой страницы нет в монтажном листе.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Этой страницы нет в монтажном листе.</p>
         <a
           href="/"
           className="mt-6 inline-flex items-center justify-center rounded-xl px-5 py-2 text-sm font-medium [background:var(--gradient-primary)] shadow-[var(--shadow-neon)]"
@@ -38,17 +36,34 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Кинематографичная платформа для авторов и зрителей короткометражек 12–15 минут. Загружайте, открывайте, сохраняйте.",
+          "Кинематографичная платформа для авторов и зрителей короткометражек 5–16 минут. Загружайте, открывайте, сохраняйте.",
       },
       { property: "og:title", content: "YCT — Платформа короткометражного кино" },
-      { property: "og:description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
+      {
+        property: "og:description",
+        content: "Neon Reel Cinema is a web platform for discovering and sharing short films.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "YCT — Платформа короткометражного кино" },
-      { name: "description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
-      { name: "twitter:description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png" },
+      {
+        name: "description",
+        content: "Neon Reel Cinema is a web platform for discovering and sharing short films.",
+      },
+      {
+        name: "twitter:description",
+        content: "Neon Reel Cinema is a web platform for discovering and sharing short films.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
