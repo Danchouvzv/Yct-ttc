@@ -7,25 +7,18 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?
 
 export const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
-if (!hasSupabaseConfig && import.meta.env.DEV) {
-  console.warn(
-    "Missing Supabase environment variables. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set.",
-  );
-}
+const resolvedSupabaseUrl = hasSupabaseConfig ? SUPABASE_URL : "https://placeholder.supabase.co";
+const resolvedSupabaseKey = hasSupabaseConfig ? SUPABASE_PUBLISHABLE_KEY : "placeholder-key";
 
 // Singleton client — never recreated between hot-reloads or SPA navigations.
-export const supabase = createClient<Database>(
-  hasSupabaseConfig ? SUPABASE_URL : "https://missing-supabase-url.supabase.co",
-  hasSupabaseConfig ? SUPABASE_PUBLISHABLE_KEY : "missing-supabase-publishable-key",
-  {
-    auth: {
-      // Store session in localStorage so it survives F5 / tab close / re-open.
-      storage: typeof window !== "undefined" ? window.localStorage : undefined,
-      persistSession: true,
-      // Automatically refresh the access token before it expires (~1 min before exp).
-      autoRefreshToken: true,
-      // Detect session from URL hash on OAuth callback pages.
-      detectSessionInUrl: true,
-    },
+export const supabase = createClient<Database>(resolvedSupabaseUrl, resolvedSupabaseKey, {
+  auth: {
+    // Store session in localStorage so it survives F5 / tab close / re-open.
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    persistSession: true,
+    // Automatically refresh the access token before it expires (~1 min before exp).
+    autoRefreshToken: true,
+    // Detect session from URL hash on OAuth callback pages.
+    detectSessionInUrl: true,
   },
-);
+});

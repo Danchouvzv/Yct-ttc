@@ -2,14 +2,25 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { UploadCloud, Image as ImageIcon, FileText, Send, Save, Plus, Trash2, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import {
+  UploadCloud,
+  Image as ImageIcon,
+  FileText,
+  Send,
+  Save,
+  Plus,
+  Trash2,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 
-const MIN_DURATION_SECONDS = 5 * 60;   // 5 minutes
-const MAX_DURATION_SECONDS = 12 * 60;  // 12 minutes
+const MIN_DURATION_SECONDS = 5 * 60; // 5 minutes
+const MAX_DURATION_SECONDS = 12 * 60; // 12 minutes
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
 
 export const Route = createFileRoute("/upload")({
@@ -44,7 +55,9 @@ function SubmitPage() {
 
   const [video, setVideo] = useState<File | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
-  const [durationStatus, setDurationStatus] = useState<"ok" | "too-short" | "too-long" | null>(null);
+  const [durationStatus, setDurationStatus] = useState<"ok" | "too-short" | "too-long" | null>(
+    null,
+  );
   const [thumb, setThumb] = useState<File | null>(null);
   const [doc, setDoc] = useState<File | null>(null);
 
@@ -52,12 +65,13 @@ function SubmitPage() {
   const [theme, setTheme] = useState<"theme_1" | "theme_2" | "">("");
   const [description, setDescription] = useState("");
   const [genres, setGenres] = useState("");
-  const [conditions, setConditions] = useState("");
   const [reach, setReach] = useState("");
   const [connect, setConnect] = useState("");
 
   const [participants, setParticipants] = useState<Participant[]>([
-    { ...emptyP }, { ...emptyP }, { ...emptyP },
+    { ...emptyP },
+    { ...emptyP },
+    { ...emptyP },
   ]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -210,7 +224,11 @@ function SubmitPage() {
         setProgress(85);
       }
 
-      const tagArr = genres.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 12);
+      const tagArr = genres
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 12);
 
       if (!videoPath) {
         toast.warning("Загрузите видео перед отправкой");
@@ -226,7 +244,7 @@ function SubmitPage() {
         // Store in both `genres` (tournament logic) and `tags` (UI display / explore filter)
         genres: tagArr,
         tags: tagArr,
-        conditions_log: conditions.trim() || null,
+        conditions_log: null,
         portfolio_reach: reach.trim() || null,
         portfolio_connect: connect.trim() || null,
         portfolio_doc_path: docPath,
@@ -289,12 +307,18 @@ function SubmitPage() {
               durationStatus === "ok"
                 ? "border-green-400/40"
                 : durationStatus === "too-short" || durationStatus === "too-long"
-                ? "border-destructive/40"
-                : ""
+                  ? "border-destructive/40"
+                  : ""
             }`}
             style={{ borderStyle: "dashed", borderWidth: 1 }}
           >
-            <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={(e) => onPickVideo(e.target.files?.[0] ?? null)} />
+            <input
+              ref={videoRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => onPickVideo(e.target.files?.[0] ?? null)}
+            />
             {durationStatus === "ok" ? (
               <CheckCircle2 className="mx-auto h-9 w-9 text-green-400" />
             ) : durationStatus === "too-short" || durationStatus === "too-long" ? (
@@ -307,12 +331,24 @@ function SubmitPage() {
             {duration !== null && (
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm">
                 <Clock className="h-3.5 w-3.5 text-accent" />
-                <span className={durationStatus === "ok" ? "text-green-400" : durationStatus === "too-short" || durationStatus === "too-long" ? "text-destructive" : "text-foreground"}>
+                <span
+                  className={
+                    durationStatus === "ok"
+                      ? "text-green-400"
+                      : durationStatus === "too-short" || durationStatus === "too-long"
+                        ? "text-destructive"
+                        : "text-foreground"
+                  }
+                >
                   {formatDuration(duration)}
                 </span>
                 {durationStatus === "ok" && <span className="text-green-400/80 text-xs">✓ OK</span>}
-                {durationStatus === "too-short" && <span className="text-destructive text-xs">— слишком короткое</span>}
-                {durationStatus === "too-long" && <span className="text-destructive text-xs">— слишком длинное</span>}
+                {durationStatus === "too-short" && (
+                  <span className="text-destructive text-xs">— слишком короткое</span>
+                )}
+                {durationStatus === "too-long" && (
+                  <span className="text-destructive text-xs">— слишком длинное</span>
+                )}
               </div>
             )}
           </div>
@@ -322,7 +358,13 @@ function SubmitPage() {
             onClick={() => thumbRef.current?.click()}
             className="glass flex cursor-pointer items-center gap-4 rounded-2xl p-4 hover:bg-white/10"
           >
-            <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} />
+            <input
+              ref={thumbRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setThumb(e.target.files?.[0] ?? null)}
+            />
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5">
               <ImageIcon className="h-5 w-5 text-accent" />
             </span>
@@ -332,7 +374,9 @@ function SubmitPage() {
           <Input label={t("sub_film_title")} value={title} onChange={setTitle} />
 
           <div>
-            <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{t("sub_theme")}</span>
+            <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("sub_theme")}
+            </span>
             <div className="grid grid-cols-2 gap-3">
               {(["theme_1", "theme_2"] as const).map((th) => (
                 <button
@@ -345,20 +389,20 @@ function SubmitPage() {
                       : "border-white/10 bg-white/5 hover:bg-white/10"
                   }`}
                 >
-                  <p className="font-display">{t(th === "theme_1" ? "sub_theme_1" : "sub_theme_2")}</p>
+                  <p className="font-display">
+                    {t(th === "theme_1" ? "sub_theme_1" : "sub_theme_2")}
+                  </p>
                 </button>
               ))}
             </div>
           </div>
 
           <Textarea label={t("sub_desc")} value={description} onChange={setDescription} rows={4} />
-          <Input label={t("sub_genres")} value={genres} onChange={setGenres} placeholder="drama, noir, doc" />
-          <Textarea
-            label={t("sub_conditions")}
-            value={conditions}
-            onChange={setConditions}
-            placeholder={t("sub_conditions_ph")}
-            rows={5}
+          <Input
+            label={t("sub_genres")}
+            value={genres}
+            onChange={setGenres}
+            placeholder="drama, noir, doc"
           />
         </Section>
 
@@ -371,7 +415,13 @@ function SubmitPage() {
             onClick={() => docRef.current?.click()}
             className="glass flex cursor-pointer items-center gap-4 rounded-2xl p-4 hover:bg-white/10"
           >
-            <input ref={docRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => setDoc(e.target.files?.[0] ?? null)} />
+            <input
+              ref={docRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={(e) => setDoc(e.target.files?.[0] ?? null)}
+            />
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5">
               <FileText className="h-5 w-5 text-accent" />
             </span>
@@ -389,21 +439,49 @@ function SubmitPage() {
                     #{i + 1} · {i < 3 ? t("sub_required") : t("sub_optional")}
                   </span>
                   {i >= 3 && (
-                    <button type="button" onClick={() => removeParticipant(i)} className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      onClick={() => removeParticipant(i)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Input label={t("sub_p_name")} value={p.full_name} onChange={(v) => updateParticipant(i, "full_name", v)} />
-                  <Input label={t("sub_p_email")} value={p.email} onChange={(v) => updateParticipant(i, "email", v)} type="email" />
-                  <Input label={t("sub_p_dob")} value={p.dob} onChange={(v) => updateParticipant(i, "dob", v)} type="date" />
-                  <Input label={t("sub_p_role")} value={p.role} onChange={(v) => updateParticipant(i, "role", v)} />
+                  <Input
+                    label={t("sub_p_name")}
+                    value={p.full_name}
+                    onChange={(v) => updateParticipant(i, "full_name", v)}
+                  />
+                  <Input
+                    label={t("sub_p_email")}
+                    value={p.email}
+                    onChange={(v) => updateParticipant(i, "email", v)}
+                    type="email"
+                  />
+                  <Input
+                    label={t("sub_p_dob")}
+                    value={p.dob}
+                    onChange={(v) => updateParticipant(i, "dob", v)}
+                    type="date"
+                  />
+                  <Input
+                    label={t("sub_p_role")}
+                    value={p.role}
+                    onChange={(v) => updateParticipant(i, "role", v)}
+                  />
                 </div>
               </div>
             ))}
             {participants.length < 7 && (
-              <Button type="button" variant="glass" size="lg" onClick={addParticipant} className="w-full">
+              <Button
+                type="button"
+                variant="glass"
+                size="lg"
+                onClick={addParticipant}
+                className="w-full"
+              >
                 <Plus className="h-4 w-4" /> +
               </Button>
             )}
@@ -412,12 +490,22 @@ function SubmitPage() {
 
         {busy && (
           <div className="h-2 overflow-hidden rounded-full bg-white/5">
-            <div className="h-full [background:var(--gradient-primary)] transition-all" style={{ width: `${progress}%` }} />
+            <div
+              className="h-full [background:var(--gradient-primary)] transition-all"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="button" variant="glass" size="xl" className="flex-1" disabled={busy} onClick={() => submit(true)}>
+          <Button
+            type="button"
+            variant="glass"
+            size="xl"
+            className="flex-1"
+            disabled={busy}
+            onClick={() => submit(true)}
+          >
             <Save className="h-5 w-5" /> {t("sub_save_draft")}
           </Button>
           <Button
@@ -435,7 +523,15 @@ function SubmitPage() {
   );
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-4">
       <div>
@@ -448,11 +544,23 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 }
 
 function Input({
-  label, value, onChange, placeholder, type = "text",
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+}) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <input
         type={type}
         value={value}
@@ -465,11 +573,23 @@ function Input({
 }
 
 function Textarea({
-  label, value, onChange, placeholder, rows = 4,
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+}) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -38,16 +38,17 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "YCT — международный турнир короткометражного кино для команд, которые снимают истории на 5–12 минут.",
+          "Кинематографичная платформа для авторов и зрителей короткометражек 12–15 минут. Загружайте, открывайте, сохраняйте.",
       },
       { property: "og:title", content: "YCT — Платформа короткометражного кино" },
-      { property: "og:description", content: "Международный турнир короткого метра: команды, темы, заявки и призовой фонд." },
+      { property: "og:description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "YCT — Платформа короткометражного кино" },
-      { name: "twitter:description", content: "Международный турнир короткого метра: команды, темы, заявки и призовой фонд." },
-      { property: "og:image", content: "/images/yct-hero-cinema.png" },
-      { name: "twitter:image", content: "/images/yct-hero-cinema.png" },
+      { name: "description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
+      { name: "twitter:description", content: "Neon Reel Cinema is a web platform for discovering and sharing short films." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/65373421-511e-49fd-8161-1ebbb47877bd/id-preview-1414d2a1--8f2e87f7-7997-4d4a-b016-c2241b18c181.lovable.app-1777353110851.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

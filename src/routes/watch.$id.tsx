@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, Bookmark, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { FilmRating } from "@/components/FilmRating";
@@ -24,6 +24,7 @@ function Watch() {
 
   const { data: film, isLoading } = useQuery({
     queryKey: ["film", id],
+    enabled: hasSupabaseConfig,
     queryFn: async () => {
       const { data, error } = await supabase.from("films").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
@@ -32,7 +33,7 @@ function Watch() {
   });
 
   const { data: author } = useQuery({
-    enabled: !!film?.user_id,
+    enabled: hasSupabaseConfig && !!film?.user_id,
     queryKey: ["profile", film?.user_id],
     queryFn: async () => {
       const { data } = await supabase
@@ -46,6 +47,7 @@ function Watch() {
 
   const { data: likeCount } = useQuery({
     queryKey: ["likes", id],
+    enabled: hasSupabaseConfig,
     queryFn: async () => {
       const { count } = await supabase
         .from("film_likes")
@@ -56,7 +58,7 @@ function Watch() {
   });
 
   const { data: liked } = useQuery({
-    enabled: !!user,
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["liked", id, user?.id],
     queryFn: async () => {
       const { data } = await supabase
@@ -70,7 +72,7 @@ function Watch() {
   });
 
   const { data: saved } = useQuery({
-    enabled: !!user,
+    enabled: hasSupabaseConfig && !!user,
     queryKey: ["saved", id, user?.id],
     queryFn: async () => {
       const { data } = await supabase
@@ -87,7 +89,7 @@ function Watch() {
   // StrictMode's double-invoke in development.
   const viewedRef = useRef(false);
   useEffect(() => {
-    if (!film || viewedRef.current) return;
+    if (!hasSupabaseConfig || !film || viewedRef.current) return;
     viewedRef.current = true;
     // Don't count the author's own views.
     if (user && film.user_id === user.id) return;
@@ -155,22 +157,23 @@ function Watch() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-      <Link to="/explore" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/explore"
+        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> К списку
       </Link>
 
       {/* Cinematic player frame */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[var(--shadow-glass)]">
-        <video
-          src={videoUrl}
-          controls
-          autoPlay
-          className="aspect-video w-full bg-black"
-        />
+        <video src={videoUrl} controls autoPlay className="aspect-video w-full bg-black" />
         {/* Subtle inner vignette */}
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse at center, transparent 60%, oklch(0 0 0 / 0.55) 100%)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse at center, transparent 60%, oklch(0 0 0 / 0.55) 100%)",
+          }}
         />
       </div>
 
@@ -188,7 +191,9 @@ function Watch() {
             </span>
             <span>·</span>
             <span>{film.views ?? 0} просмотров</span>
-            <span className="ml-2"><FollowButton authorId={film.user_id} /></span>
+            <span className="ml-2">
+              <FollowButton authorId={film.user_id} />
+            </span>
           </div>
 
           {film.description && (
@@ -200,7 +205,10 @@ function Watch() {
           {film.tags && film.tags.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
               {film.tags.map((t) => (
-                <span key={t} className="rounded-full glass px-3 py-1 text-xs text-muted-foreground">
+                <span
+                  key={t}
+                  className="rounded-full glass px-3 py-1 text-xs text-muted-foreground"
+                >
                   #{t}
                 </span>
               ))}

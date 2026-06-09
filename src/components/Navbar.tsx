@@ -1,19 +1,14 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Film, Upload, LayoutDashboard, LogOut, LogIn, Languages } from "lucide-react";
-import { useState } from "react";
+import { Film, Upload, LayoutDashboard, LogOut, LogIn, Languages, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
 import { useI18n, type Lang } from "@/i18n";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
-  const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
@@ -27,74 +22,32 @@ export function Navbar() {
   ];
 
   return (
-    <header className="pointer-events-none fixed left-0 right-0 top-0 z-40 w-full px-3 pt-3 sm:px-6">
-      <div className="pointer-events-auto mx-auto max-w-7xl rounded-full border border-white/10 bg-[#0d0d18]/55 px-4 py-3 shadow-[0_24px_80px_-42px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:px-5">
-        <div className="flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 font-mono text-lg font-semibold">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-white/8 text-white">
-              <Film className="h-4 w-4 text-white" />
+    <header className="sticky top-0 z-40 w-full">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mt-4 flex h-14 items-center justify-between rounded-2xl glass px-4 shadow-[var(--shadow-glass)]">
+          <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
+            <span className="grid h-8 w-8 place-items-center rounded-lg [background:var(--gradient-primary)] shadow-[var(--shadow-neon)]">
+              <Film className="h-4 w-4 text-primary-foreground" />
             </span>
-            <span className="text-white">YCT</span>
+            <span className="text-gradient">YCT</span>
           </Link>
 
-          <nav
-            className="hidden items-center gap-6 lg:flex"
-            onMouseLeave={() => setHoveredNavItem(null)}
-          >
-            <NavLink
-              to="/"
-              label={t("nav_home")}
-              active={path === "/"}
-              item="home"
-              hoveredNavItem={hoveredNavItem}
-              setHoveredNavItem={setHoveredNavItem}
-            />
-            <NavLink
-              to="/tournament"
-              label="Турнир"
-              active={path.startsWith("/tournament")}
-              item="tournament"
-              hoveredNavItem={hoveredNavItem}
-              setHoveredNavItem={setHoveredNavItem}
-            />
-            <NavLink
-              to="/explore"
-              label={t("nav_explore")}
-              active={path.startsWith("/explore")}
-              item="explore"
-              hoveredNavItem={hoveredNavItem}
-              setHoveredNavItem={setHoveredNavItem}
-            />
+          <nav className="hidden items-center gap-1 sm:flex">
+            <NavLink to="/" label={t("nav_home")} active={path === "/"} />
+            <NavLink to="/tournament" label="Турнир" active={path.startsWith("/tournament")} />
+            <NavLink to="/explore" label={t("nav_explore")} active={path.startsWith("/explore")} />
             {user && (
-              <NavLink
-                to="/dashboard"
-                label={t("nav_dashboard")}
-                active={path.startsWith("/dashboard")}
-                item="dashboard"
-                hoveredNavItem={hoveredNavItem}
-                setHoveredNavItem={setHoveredNavItem}
-              />
+              <NavLink to="/dashboard" label={t("nav_dashboard")} active={path.startsWith("/dashboard")} />
             )}
             {isAdmin && (
-              <NavLink
-                to="/admin"
-                label="Admin"
-                active={path.startsWith("/admin")}
-                item="admin"
-                hoveredNavItem={hoveredNavItem}
-                setHoveredNavItem={setHoveredNavItem}
-              />
+              <NavLink to="/admin" label="Admin" active={path.startsWith("/admin")} />
             )}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 rounded-full px-2 text-gray-300 hover:bg-white/8"
-                >
+                <Button variant="ghost" size="sm" className="gap-1 px-2">
                   <Languages className="h-4 w-4" />
                   <span className="text-xs uppercase">{lang}</span>
                 </Button>
@@ -133,12 +86,7 @@ export function Navbar() {
                 </Button>
               </>
             ) : (
-              <Button
-                asChild
-                variant="glass"
-                size="sm"
-                className="rounded-full border-[#322D36] bg-[#8200DB29] px-4 font-semibold text-white hover:bg-black/50 sm:px-5"
-              >
+              <Button asChild variant="hero" size="sm">
                 <Link to="/login">
                   <LogIn className="h-4 w-4" /> {t("nav_login")}
                 </Link>
@@ -151,34 +99,12 @@ export function Navbar() {
   );
 }
 
-function NavLink({
-  to,
-  label,
-  active,
-  item,
-  hoveredNavItem,
-  setHoveredNavItem,
-}: {
-  to: string;
-  label: string;
-  active: boolean;
-  item: string;
-  hoveredNavItem: string | null;
-  setHoveredNavItem: (item: string | null) => void;
-}) {
-  const isCurrentItemHovered = hoveredNavItem === item;
-  const isAnotherItemHovered = hoveredNavItem !== null && !isCurrentItemHovered;
-
+function NavLink({ to, label, active }: { to: string; label: string; active: boolean }) {
   return (
     <Link
       to={to}
-      onMouseEnter={() => setHoveredNavItem(item)}
-      className={`font-mono text-sm transition duration-150 ${
-        isCurrentItemHovered || active
-          ? "text-white"
-          : isAnotherItemHovered
-            ? "text-gray-500"
-            : "text-gray-300"
+      className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+        active ? "text-foreground bg-white/5" : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {label}

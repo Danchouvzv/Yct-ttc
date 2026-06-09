@@ -3,8 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  Shield, Users, Film as FilmIcon, Download, Search, ExternalLink,
-  Check, X, Ban, Trash2, UserPlus, UserMinus,
+  Shield,
+  Users,
+  Film as FilmIcon,
+  Download,
+  Search,
+  ExternalLink,
+  Check,
+  X,
+  Ban,
+  Trash2,
+  UserPlus,
+  UserMinus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,15 +24,30 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
-  AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin")({
@@ -31,17 +56,32 @@ export const Route = createFileRoute("/admin")({
 });
 
 type Film = {
-  id: string; user_id: string; title: string; theme: string | null;
-  genres: string[] | null; status: "pending" | "approved" | "rejected" | "disqualified";
-  moderation_note: string | null; created_at: string; submitted: boolean;
-  submitted_at: string | null; video_path: string; thumb_path: string | null;
-  description: string | null; conditions_log: string | null;
-  portfolio_reach: string | null; portfolio_connect: string | null;
-  portfolio_doc_path: string | null; participants: unknown;
+  id: string;
+  user_id: string;
+  title: string;
+  theme: string | null;
+  genres: string[] | null;
+  status: "pending" | "approved" | "rejected" | "disqualified";
+  moderation_note: string | null;
+  created_at: string;
+  submitted: boolean;
+  submitted_at: string | null;
+  video_path: string;
+  thumb_path: string | null;
+  description: string | null;
+  conditions_log: string | null;
+  portfolio_reach: string | null;
+  portfolio_connect: string | null;
+  portfolio_doc_path: string | null;
+  participants: unknown;
 };
 type Profile = {
-  id: string; team_name: string | null; display_name: string | null;
-  country: string | null; city: string | null; language: string | null;
+  id: string;
+  team_name: string | null;
+  display_name: string | null;
+  country: string | null;
+  city: string | null;
+  language: string | null;
   created_at: string;
 };
 type Role = { user_id: string; role: "admin" | "moderator" | "user" };
@@ -79,16 +119,36 @@ function AdminPage() {
 
       <Tabs defaultValue="films" className="w-full">
         <TabsList className="grid w-full max-w-2xl grid-cols-4">
-          <TabsTrigger value="films"><FilmIcon className="mr-1 h-4 w-4" />Фильмы</TabsTrigger>
-          <TabsTrigger value="teams"><Users className="mr-1 h-4 w-4" />Команды</TabsTrigger>
-          <TabsTrigger value="roles"><Shield className="mr-1 h-4 w-4" />Роли</TabsTrigger>
-          <TabsTrigger value="export"><Download className="mr-1 h-4 w-4" />Экспорт</TabsTrigger>
+          <TabsTrigger value="films">
+            <FilmIcon className="mr-1 h-4 w-4" />
+            Фильмы
+          </TabsTrigger>
+          <TabsTrigger value="teams">
+            <Users className="mr-1 h-4 w-4" />
+            Команды
+          </TabsTrigger>
+          <TabsTrigger value="roles">
+            <Shield className="mr-1 h-4 w-4" />
+            Роли
+          </TabsTrigger>
+          <TabsTrigger value="export">
+            <Download className="mr-1 h-4 w-4" />
+            Экспорт
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="films" className="mt-6"><FilmsTab /></TabsContent>
-        <TabsContent value="teams" className="mt-6"><TeamsTab /></TabsContent>
-        <TabsContent value="roles" className="mt-6"><RolesTab currentUserId={user.id} /></TabsContent>
-        <TabsContent value="export" className="mt-6"><ExportTab /></TabsContent>
+        <TabsContent value="films" className="mt-6">
+          <FilmsTab />
+        </TabsContent>
+        <TabsContent value="teams" className="mt-6">
+          <TeamsTab />
+        </TabsContent>
+        <TabsContent value="roles" className="mt-6">
+          <RolesTab currentUserId={user.id} />
+        </TabsContent>
+        <TabsContent value="export" className="mt-6">
+          <ExportTab />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -103,8 +163,10 @@ const STATUS_STYLES: Record<Film["status"], string> = {
   disqualified: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
 };
 const STATUS_LABEL: Record<Film["status"], string> = {
-  pending: "На модерации", approved: "Одобрен",
-  rejected: "Отклонён", disqualified: "Дисквалифицирован",
+  pending: "На модерации",
+  approved: "Одобрен",
+  rejected: "Отклонён",
+  disqualified: "Дисквалифицирован",
 };
 
 function FilmsTab() {
@@ -142,7 +204,8 @@ function FilmsTab() {
     const { error } = await supabase
       .from("films")
       .update({
-        status, moderation_note: note ?? null,
+        status,
+        moderation_note: note ?? null,
         moderated_at: new Date().toISOString(),
       })
       .eq("id", id);
@@ -168,15 +231,26 @@ function FilmsTab() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск по названию…" className="pl-9" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Поиск по названию…"
+            className="pl-9"
+          />
         </div>
         <div className="flex gap-1">
           {(["all", "pending", "approved", "rejected", "disqualified"] as const).map((s) => (
-            <Button key={s} size="sm" variant={statusFilter === s ? "default" : "outline"}
-              onClick={() => setStatusFilter(s)}>
+            <Button
+              key={s}
+              size="sm"
+              variant={statusFilter === s ? "default" : "outline"}
+              onClick={() => setStatusFilter(s)}
+            >
               {s === "all" ? "Все" : STATUS_LABEL[s as Film["status"]]}
               {s === "pending" && pendingCount > 0 && (
-                <span className="ml-1 rounded-full bg-amber-500/30 px-1.5 text-[10px]">{pendingCount}</span>
+                <span className="ml-1 rounded-full bg-amber-500/30 px-1.5 text-[10px]">
+                  {pendingCount}
+                </span>
               )}
             </Button>
           ))}
@@ -196,42 +270,80 @@ function FilmsTab() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Загрузка…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  Загрузка…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Ничего не найдено</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  Ничего не найдено
+                </TableCell>
+              </TableRow>
             )}
             {filtered.map((f) => (
               <TableRow key={f.id}>
                 <TableCell className="font-medium">{f.title}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{f.theme ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={STATUS_STYLES[f.status]}>{STATUS_LABEL[f.status]}</Badge>
+                  <Badge variant="outline" className={STATUS_STYLES[f.status]}>
+                    {STATUS_LABEL[f.status]}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {f.submitted ? (f.submitted_at ? new Date(f.submitted_at).toLocaleDateString() : "да") : "черновик"}
+                  {f.submitted
+                    ? f.submitted_at
+                      ? new Date(f.submitted_at).toLocaleDateString()
+                      : "да"
+                    : "черновик"}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <FilmDetailsDialog film={f} onUpdate={updateStatus} />
-                    <Button size="icon" variant="ghost" title="Одобрить"
-                      onClick={() => updateStatus(f.id, "approved")}><Check className="h-4 w-4 text-emerald-400" /></Button>
-                    <Button size="icon" variant="ghost" title="Отклонить"
-                      onClick={() => updateStatus(f.id, "rejected")}><X className="h-4 w-4 text-rose-400" /></Button>
-                    <Button size="icon" variant="ghost" title="Дисквалификация"
-                      onClick={() => updateStatus(f.id, "disqualified")}><Ban className="h-4 w-4 text-zinc-400" /></Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Одобрить"
+                      onClick={() => updateStatus(f.id, "approved")}
+                    >
+                      <Check className="h-4 w-4 text-emerald-400" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Отклонить"
+                      onClick={() => updateStatus(f.id, "rejected")}
+                    >
+                      <X className="h-4 w-4 text-rose-400" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Дисквалификация"
+                      onClick={() => updateStatus(f.id, "disqualified")}
+                    >
+                      <Ban className="h-4 w-4 text-zinc-400" />
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="ghost" title="Удалить"><Trash2 className="h-4 w-4 text-rose-500" /></Button>
+                        <Button size="icon" variant="ghost" title="Удалить">
+                          <Trash2 className="h-4 w-4 text-rose-500" />
+                        </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Удалить фильм?</AlertDialogTitle>
-                          <AlertDialogDescription>«{f.title}» будет удалён безвозвратно.</AlertDialogDescription>
+                          <AlertDialogDescription>
+                            «{f.title}» будет удалён безвозвратно.
+                          </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Отмена</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => removeFilm(f.id)}>Удалить</AlertDialogAction>
+                          <AlertDialogAction onClick={() => removeFilm(f.id)}>
+                            Удалить
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -247,7 +359,8 @@ function FilmsTab() {
 }
 
 function FilmDetailsDialog({
-  film, onUpdate,
+  film,
+  onUpdate,
 }: {
   film: Film;
   onUpdate: (id: string, s: Film["status"], note?: string) => void;
@@ -263,7 +376,9 @@ function FilmDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">Детали</Button>
+        <Button size="sm" variant="outline">
+          Детали
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -283,11 +398,6 @@ function FilmDetailsDialog({
             <p className="whitespace-pre-wrap">{film.description || "—"}</p>
           </div>
 
-          <div>
-            <div className="text-xs uppercase text-muted-foreground mb-1">Выполненные условия</div>
-            <p className="whitespace-pre-wrap">{film.conditions_log || "—"}</p>
-          </div>
-
           <div className="grid gap-3 md:grid-cols-2">
             <div>
               <div className="text-xs uppercase text-muted-foreground mb-1">Портфолио: Reach</div>
@@ -301,14 +411,22 @@ function FilmDetailsDialog({
 
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm" variant="outline">
-              <a href={videoUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-1 h-3 w-3" />Видео</a>
+              <a href={videoUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="mr-1 h-3 w-3" />
+                Видео
+              </a>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link to="/watch/$id" params={{ id: film.id }}>Открыть страницу</Link>
+              <Link to="/watch/$id" params={{ id: film.id }}>
+                Открыть страницу
+              </Link>
             </Button>
             {portfolioUrl && (
               <Button asChild size="sm" variant="outline">
-                <a href={portfolioUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-1 h-3 w-3" />Портфолио-док</a>
+                <a href={portfolioUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink className="mr-1 h-3 w-3" />
+                  Портфолио-док
+                </a>
               </Button>
             )}
           </div>
@@ -316,24 +434,59 @@ function FilmDetailsDialog({
           <div>
             <div className="text-xs uppercase text-muted-foreground mb-1">Участники</div>
             <pre className="rounded-lg bg-black/30 p-3 text-xs overflow-x-auto">
-{JSON.stringify(film.participants, null, 2)}
+              {JSON.stringify(film.participants, null, 2)}
             </pre>
           </div>
 
           <div className="space-y-2">
             <label className="text-xs uppercase text-muted-foreground">Заметка модератора</label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Причина решения…" />
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Причина решения…"
+            />
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="default" onClick={() => { onUpdate(film.id, "approved", note); setOpen(false); }}>
-                <Check className="mr-1 h-4 w-4" />Одобрить
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => {
+                  onUpdate(film.id, "approved", note);
+                  setOpen(false);
+                }}
+              >
+                <Check className="mr-1 h-4 w-4" />
+                Одобрить
               </Button>
-              <Button size="sm" variant="outline" onClick={() => { onUpdate(film.id, "rejected", note); setOpen(false); }}>
-                <X className="mr-1 h-4 w-4" />Отклонить
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  onUpdate(film.id, "rejected", note);
+                  setOpen(false);
+                }}
+              >
+                <X className="mr-1 h-4 w-4" />
+                Отклонить
               </Button>
-              <Button size="sm" variant="outline" onClick={() => { onUpdate(film.id, "disqualified", note); setOpen(false); }}>
-                <Ban className="mr-1 h-4 w-4" />Дисквалификация
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  onUpdate(film.id, "disqualified", note);
+                  setOpen(false);
+                }}
+              >
+                <Ban className="mr-1 h-4 w-4" />
+                Дисквалификация
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => { onUpdate(film.id, "pending", note); setOpen(false); }}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  onUpdate(film.id, "pending", note);
+                  setOpen(false);
+                }}
+              >
                 Вернуть на модерацию
               </Button>
             </div>
@@ -373,11 +526,12 @@ function TeamsTab() {
     const list = profiles ?? [];
     if (!q) return list;
     const lower = q.toLowerCase();
-    return list.filter((p) =>
-      (p.team_name ?? "").toLowerCase().includes(lower) ||
-      (p.display_name ?? "").toLowerCase().includes(lower) ||
-      (p.country ?? "").toLowerCase().includes(lower) ||
-      (p.city ?? "").toLowerCase().includes(lower),
+    return list.filter(
+      (p) =>
+        (p.team_name ?? "").toLowerCase().includes(lower) ||
+        (p.display_name ?? "").toLowerCase().includes(lower) ||
+        (p.country ?? "").toLowerCase().includes(lower) ||
+        (p.city ?? "").toLowerCase().includes(lower),
     );
   }, [profiles, q]);
 
@@ -385,7 +539,12 @@ function TeamsTab() {
     <div className="space-y-4">
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск команд…" className="pl-9" />
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Поиск команд…"
+          className="pl-9"
+        />
       </div>
 
       <div className="rounded-xl glass overflow-hidden">
@@ -400,18 +559,34 @@ function TeamsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Загрузка…</TableCell></TableRow>}
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  Загрузка…
+                </TableCell>
+              </TableRow>
+            )}
             {!isLoading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Нет команд</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  Нет команд
+                </TableCell>
+              </TableRow>
             )}
             {filtered.map((p) => (
               <TableRow key={p.id}>
-                <TableCell className="font-medium">{p.team_name ?? p.display_name ?? "—"}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{p.display_name ?? "—"}</TableCell>
+                <TableCell className="font-medium">
+                  {p.team_name ?? p.display_name ?? "—"}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {p.display_name ?? "—"}
+                </TableCell>
                 <TableCell className="text-sm">
                   {[p.country, p.city].filter(Boolean).join(", ") || "—"}
                 </TableCell>
-                <TableCell className="text-sm uppercase text-muted-foreground">{p.language ?? "—"}</TableCell>
+                <TableCell className="text-sm uppercase text-muted-foreground">
+                  {p.language ?? "—"}
+                </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(p.created_at).toLocaleDateString()}
                 </TableCell>
@@ -434,7 +609,10 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
   const { data: profiles } = useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Profile[];
     },
@@ -449,15 +627,19 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
     },
   });
 
-  const adminSet = useMemo(() => new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id)), [roles]);
+  const adminSet = useMemo(
+    () => new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id)),
+    [roles],
+  );
 
   const filtered = useMemo(() => {
     const list = profiles ?? [];
     if (!q) return list;
     const lower = q.toLowerCase();
-    return list.filter((p) =>
-      (p.team_name ?? "").toLowerCase().includes(lower) ||
-      (p.display_name ?? "").toLowerCase().includes(lower),
+    return list.filter(
+      (p) =>
+        (p.team_name ?? "").toLowerCase().includes(lower) ||
+        (p.display_name ?? "").toLowerCase().includes(lower),
     );
   }, [profiles, q]);
 
@@ -469,7 +651,11 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
   }
   async function revoke(userId: string) {
     if (userId === currentUserId) return toast.error("Нельзя снять роль с себя");
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("role", "admin");
     if (error) return toast.error(error.message);
     toast.success("Роль admin снята");
     qc.invalidateQueries({ queryKey: ["admin-roles"] });
@@ -479,7 +665,12 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
     <div className="space-y-4">
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск…" className="pl-9" />
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Поиск…"
+          className="pl-9"
+        />
       </div>
       <div className="rounded-xl glass overflow-hidden">
         <Table>
@@ -497,20 +688,33 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
               return (
                 <TableRow key={p.id}>
                   <TableCell>{p.display_name ?? "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{p.team_name ?? "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {p.team_name ?? "—"}
+                  </TableCell>
                   <TableCell>
-                    {isAdmin
-                      ? <Badge className="bg-primary/20 text-primary border border-primary/40">admin</Badge>
-                      : <Badge variant="outline">user</Badge>}
+                    {isAdmin ? (
+                      <Badge className="bg-primary/20 text-primary border border-primary/40">
+                        admin
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">user</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     {isAdmin ? (
-                      <Button size="sm" variant="outline" onClick={() => revoke(p.id)} disabled={p.id === currentUserId}>
-                        <UserMinus className="mr-1 h-4 w-4" />Снять admin
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => revoke(p.id)}
+                        disabled={p.id === currentUserId}
+                      >
+                        <UserMinus className="mr-1 h-4 w-4" />
+                        Снять admin
                       </Button>
                     ) : (
                       <Button size="sm" variant="default" onClick={() => grant(p.id)}>
-                        <UserPlus className="mr-1 h-4 w-4" />Сделать admin
+                        <UserPlus className="mr-1 h-4 w-4" />
+                        Сделать admin
                       </Button>
                     )}
                   </TableCell>
@@ -535,36 +739,51 @@ function ExportTab() {
       const s = typeof v === "object" ? JSON.stringify(v) : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const csv = [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => headers.map((h) => escape(r[h])).join(",")),
+    ].join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
+    a.href = url;
+    a.download = filename;
+    a.click();
     URL.revokeObjectURL(url);
   };
 
   const exportTeams = async () => {
     const { data, error } = await supabase.from("profiles").select("*");
     if (error) return toast.error(error.message);
-    downloadCsv(`teams_${new Date().toISOString().slice(0,10)}.csv`, data ?? []);
+    downloadCsv(`teams_${new Date().toISOString().slice(0, 10)}.csv`, data ?? []);
   };
   const exportFilms = async () => {
     const { data, error } = await supabase.from("films").select("*");
     if (error) return toast.error(error.message);
-    downloadCsv(`films_${new Date().toISOString().slice(0,10)}.csv`, data ?? []);
+    downloadCsv(`films_${new Date().toISOString().slice(0, 10)}.csv`, data ?? []);
   };
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <button onClick={exportTeams} className="rounded-2xl glass p-6 text-left transition hover:bg-white/5">
+      <button
+        onClick={exportTeams}
+        className="rounded-2xl glass p-6 text-left transition hover:bg-white/5"
+      >
         <Users className="h-6 w-6 text-primary" />
         <div className="mt-3 font-display text-lg">Команды (CSV)</div>
-        <p className="mt-1 text-sm text-muted-foreground">Все зарегистрированные команды со страной, городом, языком.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Все зарегистрированные команды со страной, городом, языком.
+        </p>
       </button>
-      <button onClick={exportFilms} className="rounded-2xl glass p-6 text-left transition hover:bg-white/5">
+      <button
+        onClick={exportFilms}
+        className="rounded-2xl glass p-6 text-left transition hover:bg-white/5"
+      >
         <FilmIcon className="h-6 w-6 text-primary" />
         <div className="mt-3 font-display text-lg">Фильмы (CSV)</div>
-        <p className="mt-1 text-sm text-muted-foreground">Все заявки фильмов со статусами и метаданными.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Все заявки фильмов со статусами и метаданными.
+        </p>
       </button>
     </div>
   );
