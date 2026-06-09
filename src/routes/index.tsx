@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DottedSurface } from "@/components/ui/dotted-surface";
 import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { FilmCard } from "@/components/FilmCard";
 import { useReveal } from "@/hooks/use-reveal";
@@ -68,35 +69,31 @@ function Index() {
   return (
     <div className="relative overflow-hidden bg-black">
       <section className="relative min-h-[760px] overflow-hidden px-4 pb-12 pt-28 sm:px-6 lg:min-h-screen lg:pt-32">
-        <div className="absolute inset-0">
-          <img
-            src="/images/yct-hero-cinema.png"
-            alt=""
-            className="h-full w-full object-cover opacity-45"
-          />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_32%,rgba(130,0,219,0.34),transparent_32%),linear-gradient(to_right,rgba(0,0,0,0.96)_0%,rgba(0,0,0,0.78)_42%,rgba(0,0,0,0.38)_72%,rgba(0,0,0,0.88)_100%),linear-gradient(to_bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.98))]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.16)_0_1px,transparent_1px),radial-gradient(circle_at_70%_26%,rgba(255,255,255,0.12)_0_1px,transparent_1px),radial-gradient(circle_at_58%_72%,rgba(255,255,255,0.12)_0_1px,transparent_1px)] bg-[length:120px_120px,170px_170px,220px_220px] opacity-55" />
+        <div className="absolute inset-0 bg-[#030303]">
+          <DottedSurface className="absolute inset-0 h-full w-full opacity-70" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.12),transparent_48%)] blur-[30px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(130,0,219,0.22),transparent_30%),linear-gradient(to_bottom,rgba(0,0,0,0.12),rgba(0,0,0,0.9)_82%,#000_100%)]" />
         </div>
 
-        <div className="relative z-10 mx-auto grid min-h-[620px] max-w-7xl items-center gap-10 lg:grid-cols-[0.92fr_0.78fr]">
-          <div className="max-w-3xl text-left text-white">
-            <p className="mb-5 text-xs uppercase tracking-[0.22em] text-gray-300">
+        <div className="relative z-10 mx-auto flex min-h-[620px] max-w-6xl flex-col items-center justify-center text-center">
+          <div className="max-w-4xl text-white">
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.32em] text-gray-300">
               {t("hero_kicker")}
             </p>
-            <h1 className="mb-6 text-5xl font-bold leading-[0.96] sm:text-7xl lg:text-8xl">
+            <h1 className="mb-6 font-mono text-5xl font-semibold leading-[0.96] sm:text-7xl lg:text-8xl">
               Каждый кадр
               <br /> становится историей.
             </h1>
-            <p className="mb-9 max-w-xl text-base leading-7 text-gray-300 sm:text-xl">
+            <p className="mx-auto mb-9 max-w-2xl text-base leading-7 text-gray-300 sm:text-xl">
               Соберите команду, снимите короткометражный фильм и поборитесь за призовой фонд в
               международном кино-турнире YCT.
             </p>
-            <div className="flex flex-col items-start gap-3 sm:flex-row">
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
                 asChild
                 variant="glass"
                 size="xl"
-                className="rounded-full border-[#322D36] bg-[#8200DB29] font-semibold text-white hover:bg-black/50"
+                className="rounded-full border-white/15 bg-white/10 px-8 font-mono font-semibold text-white hover:bg-white/15"
               >
                 <Link to="/signup">
                   <Upload className="h-5 w-5" />
@@ -107,7 +104,7 @@ function Index() {
                 asChild
                 variant="glass"
                 size="xl"
-                className="rounded-full border-gray-600 bg-black/60 text-gray-200 hover:border-gray-400 hover:text-white"
+                className="rounded-full border-white/10 bg-black/50 px-8 font-mono text-gray-200 hover:border-white/25 hover:text-white"
               >
                 <Link to="/tournament">
                   <Play className="h-5 w-5" />
@@ -117,19 +114,10 @@ function Index() {
             </div>
           </div>
 
-          <div className="hidden lg:block">
-            <div className="overflow-hidden rounded-2xl border border-white/12 bg-white/5 p-2 shadow-[0_30px_120px_-45px_rgba(130,0,219,0.85)] backdrop-blur-xl">
-              <img
-                src="/images/yct-hero-cinema.png"
-                alt="YCT cinema preview"
-                className="aspect-[16/10] w-full rounded-xl object-cover"
-              />
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-white">
-              <HeroMetric label="Фонд" value={t("ti_prize_amount")} />
-              <HeroMetric label="Команда" value="3-7" />
-              <HeroMetric label="Дедлайн" value={formatDeadline("ru")} />
-            </div>
+          <div className="mt-14 grid w-full max-w-4xl gap-3 text-left text-white sm:grid-cols-3">
+            <HeroMetric label="Фонд" value={t("ti_prize_amount")} />
+            <HeroMetric label="Команда" value="3-7 человек" />
+            <HeroMetric label="Дедлайн" value={formatDeadline("ru")} />
           </div>
         </div>
       </section>

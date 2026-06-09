@@ -30,7 +30,7 @@ export function Navbar() {
     <header className="pointer-events-none fixed left-0 right-0 top-0 z-40 w-full px-3 pt-3 sm:px-6">
       <div className="pointer-events-auto mx-auto max-w-7xl rounded-full border border-white/10 bg-[#0d0d18]/55 px-4 py-3 shadow-[0_24px_80px_-42px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:px-5">
         <div className="flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
+          <Link to="/" className="flex items-center gap-2 font-mono text-lg font-semibold">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-white/8 text-white">
               <Film className="h-4 w-4 text-white" />
             </span>
@@ -173,7 +173,7 @@ function NavLink({
     <Link
       to={to}
       onMouseEnter={() => setHoveredNavItem(item)}
-      className={`text-sm transition duration-150 ${
+      className={`font-mono text-sm transition duration-150 ${
         isCurrentItemHovered || active
           ? "text-white"
           : isAnotherItemHovered
