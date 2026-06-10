@@ -10,6 +10,7 @@ import {
   Languages,
   CalendarClock,
   ListChecks,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/use-reveal";
@@ -19,13 +20,13 @@ export const Route = createFileRoute("/tournament")({
   component: TournamentPage,
   head: () => ({
     meta: [
-      { title: "Кинотурнир YCT — Правила и требования" },
+      { title: "Кинотурнир YCT — Этапы и правила" },
       {
         name: "description",
         content:
-          "Полные правила международного кинотурнира YCT: формат участия, Connect & Reach, отбор фильмов, требования к заявке.",
+          "Этапы международного кинотурнира YCT: проверка, зрительское голосование, финал и направления наград.",
       },
-      { property: "og:title", content: "Кинотурнир YCT — Правила и требования" },
+      { property: "og:title", content: "Кинотурнир YCT — Этапы и правила" },
       {
         property: "og:description",
         content:
@@ -50,7 +51,7 @@ function TournamentPage() {
         </span>
         <h1 className="mt-5 font-display text-4xl leading-tight sm:text-6xl">
           <span className="text-gradient">Кинотурнир</span>{" "}
-          <em className="font-serif italic font-normal">правила и требования</em>
+          <em className="font-serif italic font-normal">этапы и правила</em>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl font-serif italic text-muted-foreground">
           Международный турнир короткометражного кино. Соберите команду, снимите фильм по одной из
@@ -76,6 +77,11 @@ function TournamentPage() {
           </Button>
           <Button asChild variant="glass" size="xl">
             <Link to="/dashboard">Личный кабинет</Link>
+          </Button>
+          <Button asChild variant="glass" size="xl">
+            <a href="/yct-regulations.pdf" download>
+              <Download className="h-4 w-4" /> Положение
+            </a>
           </Button>
         </div>
       </header>
@@ -116,7 +122,8 @@ function TournamentPage() {
 
         <Section icon={Instagram} title="Connect & Reach">
           <p className="text-sm leading-relaxed text-foreground/85">
-            Вес оценки Connect & Reach — <b>30% от итогового результата</b>.
+            Connect и Reach оцениваются как отдельные награды и не добавляют баллы к основным
+            направлениям финала.
           </p>
           <div className="mt-3 space-y-2">
             <Bullet>Команда загружает портфолио в личном кабинете.</Bullet>
@@ -177,11 +184,18 @@ function TournamentPage() {
           </Bullet>
         </Section>
 
-        <Section icon={ListChecks} title="Что проверить перед отправкой">
-          <Bullet>Видео загружено, длительность 5–16 минут, файл &lt; 2 ГБ.</Bullet>
-          <Bullet>Указан состав команды (3–7) и помощники (до 10), все имена — латиницей.</Bullet>
-          <Bullet>Заполнены блоки Connect & Reach и прикреплены материалы команды.</Bullet>
-          <Bullet>Прикреплено PDF-портфолио (до 3 страниц A4, до 10 МБ).</Bullet>
+        <Section icon={Download} title="Положение турнира">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <p className="max-w-2xl text-sm leading-relaxed text-foreground/85">
+              Полная версия положения доступна в PDF: правила участия, порядок оценки, этапы и
+              организационные условия турнира.
+            </p>
+            <Button asChild variant="hero" size="lg">
+              <a href="/yct-regulations.pdf" download>
+                <Download className="h-4 w-4" /> Скачать PDF
+              </a>
+            </Button>
+          </div>
         </Section>
       </div>
 

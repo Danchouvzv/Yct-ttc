@@ -104,8 +104,8 @@ const D: Dict = {
   sub_film: { ru: "О фильме", kk: "Фильм туралы", en: "Film" },
   sub_film_title: { ru: "Название фильма", kk: "Фильм атауы", en: "Film title" },
   sub_theme: { ru: "Тема фильма", kk: "Фильм тақырыбы", en: "Film theme" },
-  sub_theme_1: { ru: "Тема 1", kk: "Тақырып 1", en: "Theme 1" },
-  sub_theme_2: { ru: "Тема 2", kk: "Тақырып 2", en: "Theme 2" },
+  sub_theme_1: { ru: "Конец и начало", kk: "Соңы мен басы", en: "The end and the beginning" },
+  sub_theme_2: { ru: "Мои заботы", kk: "Менің мазасыздықтарым", en: "My concerns" },
   sub_desc: { ru: "Краткое описание", kk: "Қысқаша сипаттама", en: "Short description" },
   sub_genres: {
     ru: "Жанры (через запятую)",
@@ -124,6 +124,11 @@ const D: Dict = {
     en: "Cover (optional)",
   },
   sub_portfolio: { ru: "Социальное портфолио", kk: "Әлеуметтік портфолио", en: "Social portfolio" },
+  sub_portfolio_hint: {
+    ru: "Connect и Reach фиксируются для отдельных наград и не добавляют баллы к основным направлениям.",
+    kk: "Connect және Reach жеке марапаттар үшін тіркеледі және негізгі бағыттарға қосымша ұпай қоспайды.",
+    en: "Connect and Reach are tracked for separate awards and do not add points to the main categories.",
+  },
   sub_reach: {
     ru: "Reach — охват, аудитория, медиа",
     kk: "Reach — қамту, аудитория, медиа",

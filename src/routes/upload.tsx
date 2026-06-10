@@ -13,6 +13,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Users,
+  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -288,8 +290,24 @@ function SubmitPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-4xl text-gradient">{t("sub_title")}</h1>
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+      <header className="glass relative overflow-hidden rounded-3xl p-6 sm:p-8">
+        <div className="pointer-events-none absolute inset-0 [background:var(--gradient-primary)] opacity-10" />
+        <div className="relative">
+          <p className="text-[11px] uppercase tracking-[0.28em] text-accent/80">YCT 2026</p>
+          <h1 className="mt-3 font-display text-4xl text-gradient sm:text-5xl">{t("sub_title")}</h1>
+          <p className="mt-3 max-w-2xl font-serif text-lg italic text-muted-foreground">
+            Загрузите фильм, выберите одну из двух тем и проверьте состав команды перед отправкой на
+            модерацию.
+          </p>
+        </div>
+      </header>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <RuleCard icon={<Clock className="h-4 w-4" />} label="Хронометраж" value="5–16 минут" />
+        <RuleCard icon={<Users className="h-4 w-4" />} label="Команда" value="3–7 человек" />
+        <RuleCard icon={<Trophy className="h-4 w-4" />} label="Доп. баллы" value="не начисляются" />
+      </div>
 
       <form
         onSubmit={(e: FormEvent) => {
@@ -377,19 +395,22 @@ function SubmitPage() {
             <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
               {t("sub_theme")}
             </span>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               {(["theme_1", "theme_2"] as const).map((th) => (
                 <button
                   type="button"
                   key={th}
                   onClick={() => setTheme(th)}
-                  className={`rounded-xl border p-4 text-left transition-all ${
+                  className={`min-h-28 rounded-2xl border p-5 text-left transition-all ${
                     theme === th
                       ? "border-[var(--neon)] bg-white/10 shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon)_18%,transparent)]"
                       : "border-white/10 bg-white/5 hover:bg-white/10"
                   }`}
                 >
-                  <p className="font-display">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-accent/80">
+                    {th === "theme_1" ? "01" : "02"}
+                  </span>
+                  <p className="mt-3 font-display text-xl">
                     {t(th === "theme_1" ? "sub_theme_1" : "sub_theme_2")}
                   </p>
                 </button>
@@ -407,7 +428,7 @@ function SubmitPage() {
         </Section>
 
         {/* SECTION: PORTFOLIO */}
-        <Section title={t("sub_portfolio")}>
+        <Section title={t("sub_portfolio")} hint={t("sub_portfolio_hint")}>
           <Textarea label={t("sub_reach")} value={reach} onChange={setReach} rows={4} />
           <Textarea label={t("sub_connect")} value={connect} onChange={setConnect} rows={4} />
 
@@ -540,6 +561,20 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+function RuleCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="glass flex items-center gap-3 rounded-2xl p-4">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+        {icon}
+      </span>
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{label}</p>
+        <p className="font-display text-lg">{value}</p>
+      </div>
+    </div>
   );
 }
 
