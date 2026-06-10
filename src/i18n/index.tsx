@@ -19,8 +19,12 @@ const D: Dict = {
     kk: "Халықаралық кино-турнир",
     en: "International Film Tournament",
   },
-  hero_title_a: { ru: "Каждый кадр —", kk: "Әр кадр —", en: "Every frame —" },
-  hero_title_b: { ru: "история на 16 минут", kk: "16 минуттық оқиға", en: "a 16-minute story" },
+  hero_title_a: { ru: "Кино — это место,", kk: "Кино — бұл орын,", en: "Cinema is a place" },
+  hero_title_b: {
+    ru: "где каждый может помечтать.",
+    kk: "онда әркім армандай алады.",
+    en: "where anyone can dream.",
+  },
   hero_sub: {
     ru: "Соберите команду, снимите короткометражку и поборитесь за миллион.",
     kk: "Команда жинаңыз, қысқаметражды түсіріп, миллион үшін күресіңіз.",
@@ -33,9 +37,9 @@ const D: Dict = {
   ti_title: { ru: "О турнире", kk: "Турнир туралы", en: "About the tournament" },
   ti_themes: { ru: "Темы", kk: "Тақырыптар", en: "Themes" },
   ti_themes_body: {
-    ru: "Конец и начало; мои заботы",
-    kk: "Соңы мен басы; менің мазасыздықтарым",
-    en: "The end and the beginning; my concerns",
+    ru: "Конец и начало\nМои заботы",
+    kk: "Соңы мен басы\nМенің мазасыздықтарым",
+    en: "The end and the beginning\nMy concerns",
   },
   ti_who: { ru: "Кто может участвовать", kk: "Кім қатыса алады", en: "Who can participate" },
   ti_who_body: {
@@ -45,7 +49,7 @@ const D: Dict = {
   },
   ti_teams: { ru: "Зарегистрированных команд", kk: "Тіркелген топтар", en: "Registered teams" },
   ti_prize: { ru: "Призовой фонд", kk: "Жүлде қоры", en: "Prize fund" },
-  ti_prize_amount: { ru: "1 000 000 ₸", kk: "1 000 000 ₸", en: "1,000,000 ₸" },
+  ti_prize_amount: { ru: "1 000 000 ₸", kk: "1 000 000 ₸", en: "$2000" },
   ti_uploaded: { ru: "Загруженных фильмов", kk: "Жүктелген фильмдер", en: "Uploaded films" },
   ti_format: { ru: "Формат фильмов", kk: "Фильм форматы", en: "Film format" },
   ti_format_body: {
@@ -76,19 +80,17 @@ const D: Dict = {
     kk: "Турнир ережесін жүктеу",
     en: "Download regulations",
   },
-  ti_download_soon: { ru: "Скоро", kk: "Жақында", en: "Soon" },
-
   // tournament creators block
   tc_kicker: { ru: "Создатели турнира", kk: "Турнир жасаушылары", en: "The Tournament Creators" },
   tc_title_a: { ru: "Мы делаем", kk: "Біз жасаймыз", en: "We make" },
   tc_title_b: { ru: "турниры", kk: "турнирлер", en: "tournaments" },
   tc_sub: {
-    ru: "YCT — один из наших проектов. Зима — турнир RFMSh. Лето — международный кино-турнир.",
-    kk: "YCT — біздің жобаларымыздың бірі. Қыс — RFMSh турнирі. Жаз — халықаралық кино-турнир.",
-    en: "YCT is one of our projects. Winter — RFMSh tournament. Summer — international film tournament.",
+    ru: "YCT — один из наших проектов. Зима — турнир ЮРТ. Лето — международный кино-турнир.",
+    kk: "YCT — біздің жобаларымыздың бірі. Қыс — ЮРТ турнирі. Жаз — халықаралық кино-турнир.",
+    en: "YCT is one of our projects. Winter — YRT tournament. Summer — international film tournament.",
   },
-  tc_winter_kicker: { ru: "Зима · RFMSh", kk: "Қыс · RFMSh", en: "Winter · RFMSh" },
-  tc_winter_title: { ru: "Турнир RFMSh", kk: "RFMSh турнирі", en: "RFMSh Tournament" },
+  tc_winter_kicker: { ru: "Зима · ЮРТ", kk: "Қыс · ЮРТ", en: "Winter · YRT" },
+  tc_winter_title: { ru: "Турнир ЮРТ", kk: "ЮРТ турнирі", en: "YRT Tournament" },
   tc_summer_kicker: {
     ru: "Лето · Международный",
     kk: "Жаз · Халықаралық",

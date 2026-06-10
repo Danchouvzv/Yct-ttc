@@ -151,8 +151,10 @@ function Index() {
               <p className="text-sm text-muted-foreground">PDF · YCT 2026</p>
             </div>
           </div>
-          <Button variant="glass" size="lg" disabled>
-            {t("ti_download_soon")}
+          <Button asChild variant="glass" size="lg">
+            <a href="/yct-regulations.pdf" download>
+              {t("ti_download")}
+            </a>
           </Button>
         </div>
       </section>
@@ -286,7 +288,9 @@ function InfoCard({
       {big ? (
         <p className={`mt-2 font-display text-3xl ${accent ? "text-gradient" : ""}`}>{body}</p>
       ) : (
-        <p className="mt-2 font-serif italic text-sm text-muted-foreground">{body}</p>
+        <p className="mt-3 whitespace-pre-line font-serif text-sm italic leading-8 text-muted-foreground">
+          {body}
+        </p>
       )}
       {sponsors && (
         <div className="mt-4 grid grid-cols-3 gap-2">
