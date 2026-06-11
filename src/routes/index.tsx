@@ -10,8 +10,6 @@ import {
   Clapperboard,
   Globe2,
   FileDown,
-  Snowflake,
-  Sun,
   Film as FilmIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -194,7 +192,8 @@ function Index() {
                 {t("tc_kicker")}
               </span>
               <h2 className="mt-5 font-display text-4xl leading-tight sm:text-5xl">
-                <span className="text-gradient">{t("tc_title_a")}</span>{" "}
+                <span className="text-gradient">{t("tc_title_a")}</span>
+                <br />
                 <em className="font-serif italic font-normal text-foreground/90">
                   {t("tc_title_b")}
                 </em>
@@ -204,30 +203,10 @@ function Index() {
               </p>
             </div>
             <div className="grid gap-4 self-center">
-              <div className="glass flex items-start gap-4 rounded-2xl p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
-                  <Snowflake className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-accent/80">
-                    {t("tc_winter_kicker")}
-                  </p>
-                  <h3 className="mt-1 font-display text-lg">{t("tc_winter_title")}</h3>
-                </div>
-              </div>
-              <div className="glass flex items-start gap-4 rounded-2xl p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/20 text-primary-foreground">
-                  <Sun className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-accent/80">
-                    {t("tc_summer_kicker")}
-                  </p>
-                  <h3 className="mt-1 font-display text-lg flex items-center gap-2">
-                    {t("tc_summer_title")} <Globe2 className="h-4 w-4 text-accent" />
-                  </h3>
-                </div>
-              </div>
+              <ProjectCard title={t("tc_project_yrt")} note={t("tc_project_yrt_note")} />
+              <ProjectCard title={t("tc_project_iat")} />
+              <ProjectCard title={t("tc_project_nsb")} note={t("tc_project_nsb_note")} />
+              <ProjectCard title={t("tc_project_more")} />
             </div>
           </div>
         </div>
@@ -258,10 +237,24 @@ function Index() {
         ) : (
           <div className="glass rounded-2xl p-12 text-center reveal">
             <FilmIcon className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="mt-4 font-serif italic text-muted-foreground">—</p>
+            <p className="mt-4 font-serif italic text-muted-foreground">{t("featured_locked")}</p>
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function ProjectCard({ title, note }: { title: string; note?: string }) {
+  return (
+    <div className="glass flex items-start gap-4 rounded-2xl p-5">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+        <Trophy className="h-5 w-5" />
+      </span>
+      <div>
+        <h3 className="font-display text-lg">{title}</h3>
+        {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
+      </div>
     </div>
   );
 }

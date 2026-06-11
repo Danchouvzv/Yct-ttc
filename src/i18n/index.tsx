@@ -82,22 +82,45 @@ const D: Dict = {
   },
   // tournament creators block
   tc_kicker: { ru: "Создатели турнира", kk: "Турнир жасаушылары", en: "The Tournament Creators" },
-  tc_title_a: { ru: "Мы делаем", kk: "Біз жасаймыз", en: "We make" },
-  tc_title_b: { ru: "турниры", kk: "турнирлер", en: "tournaments" },
+  tc_title_a: { ru: "Команда", kk: "Команда", en: "Team" },
+  tc_title_b: {
+    ru: "Aurelion Youth Alliance",
+    kk: "Aurelion Youth Alliance",
+    en: "Aurelion Youth Alliance",
+  },
   tc_sub: {
-    ru: "YCT — один из наших проектов. Зима — турнир YRT. Лето — международный кино-турнир.",
-    kk: "YCT — біздің жобаларымыздың бірі. Қыс — YRT турнирі. Жаз — халықаралық кино-турнир.",
-    en: "YCT is one of our projects. Winter — YRT tournament. Summer — international film tournament.",
+    ru: "Young Cinema Tournament — один из наших проектов.",
+    kk: "Young Cinema Tournament — біздің жобаларымыздың бірі.",
+    en: "Young Cinema Tournament is one of our projects.",
   },
-  tc_winter_kicker: { ru: "Зима · YRT", kk: "Қыс · YRT", en: "Winter · YRT" },
-  tc_winter_title: { ru: "Турнир YRT", kk: "YRT турнирі", en: "YRT Tournament" },
-  tc_summer_kicker: {
-    ru: "Лето · Международный",
-    kk: "Жаз · Халықаралық",
-    en: "Summer · International",
+  tc_project_yrt: {
+    ru: "Young Researchers Tournament",
+    kk: "Young Researchers Tournament",
+    en: "Young Researchers Tournament",
   },
-  tc_summer_title: { ru: "Кино-турнир YCT", kk: "YCT кино-турнирі", en: "YCT Film Tournament" },
+  tc_project_yrt_note: { ru: "современно с YOC", kk: "YOC-пен заманауи", en: "modern with YOC" },
+  tc_project_iat: {
+    ru: "International Adventurers Tournament",
+    kk: "International Adventurers Tournament",
+    en: "International Adventurers Tournament",
+  },
+  tc_project_nsb: {
+    ru: "National Science Battles",
+    kk: "National Science Battles",
+    en: "National Science Battles",
+  },
+  tc_project_nsb_note: {
+    ru: "современно с Beyond Curriculum",
+    kk: "Beyond Curriculum-пен заманауи",
+    en: "modern with Beyond Curriculum",
+  },
+  tc_project_more: { ru: "И другие", kk: "Және басқалары", en: "And others" },
   featured_kicker: { ru: "Авант-премьера", kk: "Авант-премьера", en: "Avant-Première" },
+  featured_locked: {
+    ru: "станут доступны после окончания подачи заявок",
+    kk: "өтінім қабылдау аяқталғаннан кейін қолжетімді болады",
+    en: "will become available after submissions close",
+  },
 
   // submit form
   sub_title: { ru: "Заявка на турнир", kk: "Турнирге өтінім", en: "Tournament submission" },
