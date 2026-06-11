@@ -79,7 +79,7 @@ function TournamentPage() {
             <Link to="/dashboard">Личный кабинет</Link>
           </Button>
           <Button asChild variant="glass" size="xl">
-            <a href="/yct-regulations.pdf" download>
+            <a href="/Положение_YCT.docx" download>
               <Download className="h-4 w-4" /> Положение
             </a>
           </Button>
@@ -105,8 +105,7 @@ function TournamentPage() {
             Фильм снимается на <b>одну из двух предложенных тем</b>.
           </Bullet>
           <Bullet>
-            Максимальный возраст участников — <b>2003 год рождения и младше</b>. Минимального
-            ограничения нет.
+            Участники — <b>с 2003 года рождения по текущий год включительно</b>.
           </Bullet>
           <Bullet>
             Продолжительность фильма: <b>5–16 минут</b>.
@@ -187,12 +186,12 @@ function TournamentPage() {
         <Section icon={Download} title="Положение турнира">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <p className="max-w-2xl text-sm leading-relaxed text-foreground/85">
-              Полная версия положения доступна в PDF: правила участия, порядок оценки, этапы и
+              Полная версия положения доступна в DOCX: правила участия, порядок оценки, этапы и
               организационные условия турнира.
             </p>
             <Button asChild variant="hero" size="lg">
-              <a href="/yct-regulations.pdf" download>
-                <Download className="h-4 w-4" /> Скачать PDF
+              <a href="/Положение_YCT.docx" download>
+                <Download className="h-4 w-4" /> Скачать DOCX
               </a>
             </Button>
           </div>

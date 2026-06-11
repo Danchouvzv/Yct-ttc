@@ -148,11 +148,11 @@ function Index() {
             </span>
             <div>
               <p className="font-display text-lg">{t("ti_download")}</p>
-              <p className="text-sm text-muted-foreground">PDF · YCT 2026</p>
+              <p className="text-sm text-muted-foreground">DOCX · YCT 2026</p>
             </div>
           </div>
           <Button asChild variant="glass" size="lg">
-            <a href="/yct-regulations.pdf" download>
+            <a href="/Положение_YCT.docx" download>
               {t("ti_download")}
             </a>
           </Button>

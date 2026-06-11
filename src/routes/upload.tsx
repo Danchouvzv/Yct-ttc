@@ -148,13 +148,14 @@ function SubmitPage() {
       if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
 
       // first 3 participants required
+      const currentYear = new Date().getFullYear();
       for (let i = 0; i < 3; i++) {
         const p = participantSchema.safeParse(participants[i]);
         if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
-        // Check DOB: must be born up to 2003 inclusive
+        // Check DOB: must be born from 2003 through the current year inclusive
         const dobYear = new Date(participants[i].dob).getFullYear();
-        if (!isNaN(dobYear) && dobYear > 2003) {
-          return toast.error(`#${i + 1}: год рождения должен быть ≤ 2003`);
+        if (!isNaN(dobYear) && (dobYear < 2003 || dobYear > currentYear)) {
+          return toast.error(`#${i + 1}: год рождения должен быть с 2003 по текущий`);
         }
       }
       // optional: validate the rest if any field filled
@@ -164,8 +165,8 @@ function SubmitPage() {
           const p = participantSchema.safeParse(participants[i]);
           if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
           const dobYear = new Date(participants[i].dob).getFullYear();
-          if (!isNaN(dobYear) && dobYear > 2003) {
-            return toast.error(`#${i + 1}: год рождения должен быть ≤ 2003`);
+          if (!isNaN(dobYear) && (dobYear < 2003 || dobYear > currentYear)) {
+            return toast.error(`#${i + 1}: год рождения должен быть с 2003 по текущий`);
           }
         }
       }
