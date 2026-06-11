@@ -1,6 +1,5 @@
-// Tournament deadline — change here when the exact date is decided.
-// Currently: 1 August 2026, 00:00 Asia/Almaty (UTC+5) ⇒ 2026-07-31T19:00:00Z
-export const SUBMISSION_DEADLINE = new Date("2026-07-31T19:00:00Z");
+// Tournament deadline: 30 July 2026, 23:59 Asia/Almaty (UTC+5) ⇒ 2026-07-30T18:59:00Z
+export const SUBMISSION_DEADLINE = new Date("2026-07-30T18:59:00Z");
 
 export function isSubmissionsOpen(now: Date = new Date()): boolean {
   return now.getTime() < SUBMISSION_DEADLINE.getTime();
