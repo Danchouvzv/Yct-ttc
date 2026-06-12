@@ -31,6 +31,9 @@ const AWARDS = ["Impact award", "Visual award", "Tech award"] as const;
 
 export const Route = createFileRoute("/upload")({
   component: SubmitPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    draft: typeof search.draft === "string" ? search.draft : undefined,
+  }),
   head: () => ({ meta: [{ title: "Submit — YCT" }] }),
 });
 
@@ -40,6 +43,27 @@ type Participant = {
   phone: string;
   dob: string;
   role: string;
+};
+
+type SubmissionMeta = {
+  award_order?: string[];
+  helpers?: string[];
+};
+
+type DraftFilm = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  theme: string | null;
+  genres: string[] | null;
+  portfolio_reach: string | null;
+  portfolio_connect: string | null;
+  portfolio_doc_path: string | null;
+  participants: unknown;
+  conditions_log: string | null;
+  video_path: string | null;
+  thumb_path: string | null;
+  duration_seconds: number | null;
 };
 
 const emptyP: Participant = { full_name: "", email: "", phone: "", dob: "", role: "" };
@@ -69,9 +93,47 @@ function parseGenres(value: string) {
     .filter(Boolean);
 }
 
+function normalizeParticipants(value: unknown) {
+  const rows = Array.isArray(value) ? value : [];
+  const normalized = rows
+    .map((row) => {
+      if (!row || typeof row !== "object") return null;
+      const p = row as Partial<Record<keyof Participant, unknown>>;
+      return {
+        full_name: typeof p.full_name === "string" ? p.full_name : "",
+        email: typeof p.email === "string" ? p.email : "",
+        phone: typeof p.phone === "string" ? p.phone : "",
+        dob: typeof p.dob === "string" ? p.dob : "",
+        role: typeof p.role === "string" ? p.role : "",
+      };
+    })
+    .filter((p): p is Participant => Boolean(p));
+
+  while (normalized.length < 3) normalized.push({ ...emptyP });
+  return normalized.slice(0, 7);
+}
+
+function parseSubmissionMeta(value: string | null): SubmissionMeta {
+  if (!value) return {};
+  try {
+    const meta = JSON.parse(value) as { award_order?: unknown; helpers?: unknown };
+    return {
+      award_order: Array.isArray(meta.award_order)
+        ? meta.award_order.filter((item): item is string => typeof item === "string")
+        : undefined,
+      helpers: Array.isArray(meta.helpers)
+        ? meta.helpers.filter((item): item is string => typeof item === "string").slice(0, 10)
+        : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 function SubmitPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { draft: draftId } = Route.useSearch();
   const { t } = useI18n();
 
   const videoRef = useRef<HTMLInputElement>(null);
@@ -94,6 +156,10 @@ function SubmitPage() {
   const [connect, setConnect] = useState("");
   const [awardOrder, setAwardOrder] = useState<string[]>([...AWARDS]);
   const [helpers, setHelpers] = useState<string[]>([]);
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+  const [existingVideoPath, setExistingVideoPath] = useState<string | null>(null);
+  const [existingThumbPath, setExistingThumbPath] = useState<string | null>(null);
+  const [existingDocPath, setExistingDocPath] = useState<string | null>(null);
 
   const [participants, setParticipants] = useState<Participant[]>([
     { ...emptyP },
@@ -111,6 +177,78 @@ function SubmitPage() {
     if (!loading && !user) navigate({ to: "/login" });
   }, [loading, user, navigate]);
 
+  useEffect(() => {
+    if (!user || !draftId || loadedDraftId === draftId) return;
+
+    let cancelled = false;
+
+    async function loadDraft() {
+      const { data, error } = await supabase
+        .from("films")
+        .select(
+          "id,title,description,theme,genres,portfolio_reach,portfolio_connect,portfolio_doc_path,participants,conditions_log,video_path,thumb_path,duration_seconds",
+        )
+        .eq("id", draftId)
+        .eq("user_id", user.id)
+        .eq("submitted", false)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("[draft] load failed", error);
+        toast.error("Не удалось загрузить черновик");
+        return;
+      }
+
+      if (!data) {
+        toast.error("Черновик не найден");
+        navigate({ to: "/dashboard" });
+        return;
+      }
+
+      const draft = data as DraftFilm;
+      const meta = parseSubmissionMeta(draft.conditions_log);
+      const savedAwardOrder =
+        meta.award_order?.filter((award) => AWARDS.includes(award as (typeof AWARDS)[number])) ??
+        [];
+      const normalizedAwardOrder = [
+        ...savedAwardOrder,
+        ...AWARDS.filter((award) => !savedAwardOrder.includes(award)),
+      ].slice(0, AWARDS.length);
+
+      setLoadedDraftId(draft.id);
+      setTitle(draft.title === "Draft" ? "" : (draft.title ?? ""));
+      setTheme(draft.theme === "theme_1" || draft.theme === "theme_2" ? draft.theme : "");
+      setDescription(draft.description ?? "");
+      setGenres((draft.genres ?? []).slice(0, MAX_GENRES).join(", "));
+      setReach(draft.portfolio_reach ?? "");
+      setConnect(draft.portfolio_connect ?? "");
+      setParticipants(normalizeParticipants(draft.participants));
+      setAwardOrder(normalizedAwardOrder);
+      setHelpers(meta.helpers ?? []);
+      setExistingVideoPath(draft.video_path || null);
+      setExistingThumbPath(draft.thumb_path || null);
+      setExistingDocPath(draft.portfolio_doc_path || null);
+      setDuration(draft.duration_seconds);
+      setDurationStatus(
+        draft.duration_seconds == null
+          ? null
+          : draft.duration_seconds < MIN_DURATION_SECONDS
+            ? "too-short"
+            : draft.duration_seconds > MAX_DURATION_SECONDS
+              ? "too-long"
+              : "ok",
+      );
+    }
+
+    void loadDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [draftId, loadedDraftId, navigate, user]);
+
   const formatDuration = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = String(sec % 60).padStart(2, "0");
@@ -119,6 +257,7 @@ function SubmitPage() {
 
   const onPickVideo = (file: File | null) => {
     setVideo(file);
+    if (file) setExistingVideoPath(null);
     setDuration(null);
     setDurationStatus(null);
     if (!file) return;
@@ -222,7 +361,7 @@ function SubmitPage() {
     if (!user) return;
 
     if (!asDraft) {
-      if (!video) return toast.error(t("sub_video"));
+      if (!video && !existingVideoPath) return toast.error(t("sub_video"));
       if (!title.trim()) return toast.error(t("sub_film_title"));
       if (countWords(description) > MAX_DESCRIPTION_WORDS) {
         return toast.error(`Краткое описание: максимум ${MAX_DESCRIPTION_WORDS} слов`);
@@ -263,9 +402,9 @@ function SubmitPage() {
     setBusy(true);
     setProgress(5);
 
-    let videoPath: string | null = null;
-    let thumbPath: string | null = null;
-    let docPath: string | null = null;
+    let videoPath: string | null = existingVideoPath;
+    let thumbPath: string | null = existingThumbPath;
+    let docPath: string | null = existingDocPath;
     const ts = Date.now();
 
     try {
@@ -350,11 +489,11 @@ function SubmitPage() {
         status: "pending" as const,
       };
 
-      const { data: inserted, error: iErr } = await supabase
-        .from("films")
-        .insert(payload)
-        .select("id")
-        .single();
+      const query = loadedDraftId
+        ? supabase.from("films").update(payload).eq("id", loadedDraftId).eq("user_id", user.id)
+        : supabase.from("films").insert(payload);
+
+      const { data: inserted, error: iErr } = await query.select("id").single();
 
       if (iErr) {
         console.error("[submit] films insert failed", iErr, payload);

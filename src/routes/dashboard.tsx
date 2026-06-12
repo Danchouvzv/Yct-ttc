@@ -455,7 +455,9 @@ function ApplicationStatusBlock({ films }: { films: FilmRow[] }) {
           </Button>
           {isDraft && (
             <Button asChild variant="hero" size="sm">
-              <Link to="/upload">Продолжить заявку</Link>
+              <Link to="/upload" search={{ draft: app.id }}>
+                Продолжить заявку
+              </Link>
             </Button>
           )}
         </div>
