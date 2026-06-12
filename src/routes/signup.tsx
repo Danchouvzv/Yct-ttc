@@ -7,7 +7,6 @@ import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { AuthShell, Field } from "./login";
-import { GoogleButton } from "@/components/GoogleButton";
 import { useI18n } from "@/i18n";
 
 export const Route = createFileRoute("/signup")({
@@ -107,15 +106,7 @@ function Signup() {
 
   return (
     <AuthShell title={t("signup_team_title")} subtitle={t("hero_kicker")}>
-      <div className="space-y-3">
-        <GoogleButton label="Google" />
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground/60">
-          <span className="h-px flex-1 bg-white/10" />
-          email
-          <span className="h-px flex-1 bg-white/10" />
-        </div>
-      </div>
-      <form onSubmit={onSubmit} className="mt-4 space-y-3">
+      <form onSubmit={onSubmit} className="space-y-3">
         <Field
           icon={<Users className="h-4 w-4" />}
           type="text"

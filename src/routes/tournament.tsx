@@ -386,11 +386,23 @@ function TournamentPage() {
           <Button asChild variant="glass" size="xl">
             <Link to="/dashboard">{tr("dashboard")}</Link>
           </Button>
-          <Button asChild variant="glass" size="xl">
-            <a href="/Положение_YCT.docx" download>
-              <Download className="h-4 w-4" /> {tr("regulations")}
-            </a>
-          </Button>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button asChild variant="glass" size="xl">
+              <a href="/Положение_YCT.docx" download>
+                <Download className="h-4 w-4" /> RU
+              </a>
+            </Button>
+            <Button asChild variant="glass" size="xl">
+              <a href="/YCT_Regulations_KZ.docx" download>
+                <Download className="h-4 w-4" /> KZ
+              </a>
+            </Button>
+            <Button asChild variant="glass" size="xl">
+              <a href="/YCT_Regulations_EN.docx" download>
+                <Download className="h-4 w-4" /> EN
+              </a>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -504,11 +516,23 @@ function TournamentPage() {
             <p className="max-w-2xl text-sm leading-relaxed text-foreground/85">
               {tr("regulations_body")}
             </p>
-            <Button asChild variant="hero" size="lg">
-              <a href="/Положение_YCT.docx" download>
-                <Download className="h-4 w-4" /> {tr("download_docx")}
-              </a>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="hero" size="sm">
+                <a href="/Положение_YCT.docx" download>
+                  <Download className="h-4 w-4" /> RU
+                </a>
+              </Button>
+              <Button asChild variant="hero" size="sm">
+                <a href="/YCT_Regulations_KZ.docx" download>
+                  <Download className="h-4 w-4" /> KZ
+                </a>
+              </Button>
+              <Button asChild variant="hero" size="sm">
+                <a href="/YCT_Regulations_EN.docx" download>
+                  <Download className="h-4 w-4" /> EN
+                </a>
+              </Button>
+            </div>
           </div>
         </Section>
       </div>

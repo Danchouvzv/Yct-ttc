@@ -65,9 +65,9 @@ const D: Dict = {
   },
   ti_forbidden: { ru: "Что запрещено", kk: "Тыйым салынады", en: "Forbidden" },
   ti_forbidden_body: {
-    ru: "Сцены 18+, нецензурная лексика, плагиат, существенное использование ИИ, недостоверная информация в части Inspire.",
-    kk: "18+ көріністер, былапыт сөздер, плагиат, ЖИ-ді елеулі пайдалану, Inspire бөлігінде жалған ақпарат.",
-    en: "18+ scenes, profanity, plagiarism, substantial AI usage, false information in the Inspire section.",
+    ru: "Плагиат, существенное использование ИИ, недостоверная информация в части Inspire.",
+    kk: "Плагиат, ЖИ-ді елеулі пайдалану, Inspire бөлігінде жалған ақпарат.",
+    en: "Plagiarism, substantial AI usage, false information in the Inspire section.",
   },
   ti_sponsors: { ru: "Спонсоры", kk: "Демеушілер", en: "Sponsors" },
   ti_sponsors_body: {

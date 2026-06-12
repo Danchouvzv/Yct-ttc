@@ -149,11 +149,23 @@ function Index() {
               <p className="text-sm text-muted-foreground">DOCX · YCT 2026</p>
             </div>
           </div>
-          <Button asChild variant="glass" size="lg">
-            <a href="/Положение_YCT.docx" download>
-              {t("ti_download")}
-            </a>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="glass" size="sm">
+              <a href="/Положение_YCT.docx" download>
+                RU
+              </a>
+            </Button>
+            <Button asChild variant="glass" size="sm">
+              <a href="/YCT_Regulations_KZ.docx" download>
+                KZ
+              </a>
+            </Button>
+            <Button asChild variant="glass" size="sm">
+              <a href="/YCT_Regulations_EN.docx" download>
+                EN
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
 

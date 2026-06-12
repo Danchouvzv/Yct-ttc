@@ -6,7 +6,6 @@ import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { GoogleButton } from "@/components/GoogleButton";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -53,15 +52,7 @@ function Login() {
 
   return (
     <AuthShell title="С возвращением" subtitle="Войдите, чтобы продолжить">
-      <div className="space-y-3">
-        <GoogleButton />
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground/60">
-          <span className="h-px flex-1 bg-white/10" />
-          или email
-          <span className="h-px flex-1 bg-white/10" />
-        </div>
-      </div>
-      <form onSubmit={onSubmit} className="mt-4 space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
         <Field
           icon={<Mail className="h-4 w-4" />}
           type="email"
@@ -88,7 +79,11 @@ function Login() {
             />
             Запомнить меня
           </label>
-          <button type="button" className="hover:text-foreground" onClick={() => toast.info("Свяжитесь с поддержкой для сброса пароля")}>
+          <button
+            type="button"
+            className="hover:text-foreground"
+            onClick={() => toast.info("Свяжитесь с поддержкой для сброса пароля")}
+          >
             Забыли пароль?
           </button>
         </div>
