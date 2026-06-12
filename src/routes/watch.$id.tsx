@@ -153,7 +153,9 @@ function Watch() {
     );
   }
 
-  const videoUrl = supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl;
+  const videoUrl = film.video_path
+    ? supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl
+    : null;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
@@ -166,7 +168,13 @@ function Watch() {
 
       {/* Cinematic player frame */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[var(--shadow-glass)]">
-        <video src={videoUrl} controls autoPlay className="aspect-video w-full bg-black" />
+        {videoUrl ? (
+          <video src={videoUrl} controls autoPlay className="aspect-video w-full bg-black" />
+        ) : (
+          <div className="grid aspect-video w-full place-items-center bg-black text-muted-foreground">
+            Черновик без загруженного видео
+          </div>
+        )}
         {/* Subtle inner vignette */}
         <div
           className="pointer-events-none absolute inset-0"

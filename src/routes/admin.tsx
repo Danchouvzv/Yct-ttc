@@ -66,7 +66,7 @@ type Film = {
   created_at: string;
   submitted: boolean;
   submitted_at: string | null;
-  video_path: string;
+  video_path: string | null;
   thumb_path: string | null;
   description: string | null;
   conditions_log: string | null;
@@ -75,6 +75,7 @@ type Film = {
   portfolio_doc_path: string | null;
   participants: unknown;
 };
+type DisplayStatus = Film["status"] | "draft";
 type Profile = {
   id: string;
   team_name: string | null;
@@ -156,23 +157,49 @@ function AdminPage() {
 
 /* ============================== FILMS ============================== */
 
-const STATUS_STYLES: Record<Film["status"], string> = {
+const STATUS_STYLES: Record<DisplayStatus, string> = {
+  draft: "bg-sky-500/15 text-sky-300 border-sky-500/30",
   pending: "bg-amber-500/15 text-amber-300 border-amber-500/30",
   approved: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   rejected: "bg-rose-500/15 text-rose-300 border-rose-500/30",
   disqualified: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
 };
-const STATUS_LABEL: Record<Film["status"], string> = {
+const STATUS_LABEL: Record<DisplayStatus, string> = {
+  draft: "Черновик",
   pending: "На модерации",
   approved: "Одобрен",
   rejected: "Отклонён",
   disqualified: "Дисквалифицирован",
 };
 
+function getDisplayStatus(film: Film): DisplayStatus {
+  return film.submitted ? film.status : "draft";
+}
+
+function getSubmissionMeta(film: Film): { award_order?: string[]; helpers?: string[] } {
+  if (!film.conditions_log) return {};
+  try {
+    const meta = JSON.parse(film.conditions_log) as {
+      award_order?: unknown;
+      helpers?: unknown;
+    };
+    return {
+      award_order: Array.isArray(meta.award_order)
+        ? meta.award_order.filter((item): item is string => typeof item === "string")
+        : [],
+      helpers: Array.isArray(meta.helpers)
+        ? meta.helpers.filter((item): item is string => typeof item === "string")
+        : [],
+    };
+  } catch {
+    return {};
+  }
+}
+
 function FilmsTab() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | Film["status"]>("pending");
+  const [statusFilter, setStatusFilter] = useState<"all" | DisplayStatus>("pending");
 
   const { data: films, isLoading } = useQuery({
     queryKey: ["admin-films"],
@@ -194,7 +221,7 @@ function FilmsTab() {
   const filtered = useMemo(() => {
     const list = films ?? [];
     return list.filter((f) => {
-      if (statusFilter !== "all" && f.status !== statusFilter) return false;
+      if (statusFilter !== "all" && getDisplayStatus(f) !== statusFilter) return false;
       if (q && !f.title.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
     });
@@ -239,21 +266,23 @@ function FilmsTab() {
           />
         </div>
         <div className="flex gap-1">
-          {(["all", "pending", "approved", "rejected", "disqualified"] as const).map((s) => (
-            <Button
-              key={s}
-              size="sm"
-              variant={statusFilter === s ? "default" : "outline"}
-              onClick={() => setStatusFilter(s)}
-            >
-              {s === "all" ? "Все" : STATUS_LABEL[s as Film["status"]]}
-              {s === "pending" && pendingCount > 0 && (
-                <span className="ml-1 rounded-full bg-amber-500/30 px-1.5 text-[10px]">
-                  {pendingCount}
-                </span>
-              )}
-            </Button>
-          ))}
+          {(["all", "draft", "pending", "approved", "rejected", "disqualified"] as const).map(
+            (s) => (
+              <Button
+                key={s}
+                size="sm"
+                variant={statusFilter === s ? "default" : "outline"}
+                onClick={() => setStatusFilter(s)}
+              >
+                {s === "all" ? "Все" : STATUS_LABEL[s as DisplayStatus]}
+                {s === "pending" && pendingCount > 0 && (
+                  <span className="ml-1 rounded-full bg-amber-500/30 px-1.5 text-[10px]">
+                    {pendingCount}
+                  </span>
+                )}
+              </Button>
+            ),
+          )}
         </div>
       </div>
 
@@ -288,8 +317,8 @@ function FilmsTab() {
                 <TableCell className="font-medium">{f.title}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{f.theme ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={STATUS_STYLES[f.status]}>
-                    {STATUS_LABEL[f.status]}
+                  <Badge variant="outline" className={STATUS_STYLES[getDisplayStatus(f)]}>
+                    {STATUS_LABEL[getDisplayStatus(f)]}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
@@ -368,10 +397,13 @@ function FilmDetailsDialog({
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(film.moderation_note ?? "");
 
-  const videoUrl = supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl;
+  const videoUrl = film.video_path
+    ? supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl
+    : null;
   const portfolioUrl = film.portfolio_doc_path
     ? supabase.storage.from("portfolios").getPublicUrl(film.portfolio_doc_path).data.publicUrl
     : null;
+  const submissionMeta = getSubmissionMeta(film);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -389,7 +421,7 @@ function FilmDetailsDialog({
           <div className="grid grid-cols-2 gap-3">
             <Info label="Тема" value={film.theme} />
             <Info label="Жанры" value={(film.genres ?? []).join(", ") || "—"} />
-            <Info label="Статус" value={STATUS_LABEL[film.status]} />
+            <Info label="Статус" value={STATUS_LABEL[getDisplayStatus(film)]} />
             <Info label="Подано" value={film.submitted ? "да" : "нет"} />
           </div>
 
@@ -409,13 +441,23 @@ function FilmDetailsDialog({
             </div>
           </div>
 
+          <div className="grid gap-3 md:grid-cols-2">
+            <Info
+              label="Порядок наград"
+              value={(submissionMeta.award_order ?? []).join(" → ") || "—"}
+            />
+            <Info label="Помощники" value={(submissionMeta.helpers ?? []).join(", ") || "—"} />
+          </div>
+
           <div className="flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline">
-              <a href={videoUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-1 h-3 w-3" />
-                Видео
-              </a>
-            </Button>
+            {videoUrl && (
+              <Button asChild size="sm" variant="outline">
+                <a href={videoUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink className="mr-1 h-3 w-3" />
+                  Видео
+                </a>
+              </Button>
+            )}
             <Button asChild size="sm" variant="outline">
               <Link to="/watch/$id" params={{ id: film.id }}>
                 Открыть страницу

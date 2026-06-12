@@ -113,12 +113,13 @@ function Dashboard() {
     void refetchFilms();
   }, [user?.id, refetchFilms]);
 
-  const handleDelete = async (id: string, videoPath: string, thumbPath: string | null) => {
+  const handleDelete = async (id: string, videoPath: string | null, thumbPath: string | null) => {
     if (!confirm("Удалить этот фильм?")) return;
-    await supabase.storage
-      .from("films")
-      .remove([videoPath])
-      .catch(() => null);
+    if (videoPath)
+      await supabase.storage
+        .from("films")
+        .remove([videoPath])
+        .catch(() => null);
     if (thumbPath)
       await supabase.storage
         .from("thumbs")
@@ -402,6 +403,7 @@ function ApplicationStatusBlock({ films }: { films: FilmRow[] }) {
 
   const status = app.status ?? "pending";
   const map: Record<string, { label: string; tone: string; icon: React.ReactNode }> = {
+    draft: { label: "Черновик", tone: "text-sky-300", icon: <FileText className="h-4 w-4" /> },
     pending: { label: "На модерации", tone: "text-amber-300", icon: <Clock className="h-4 w-4" /> },
     approved: {
       label: "Принята",

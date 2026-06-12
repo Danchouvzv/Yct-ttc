@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Clock,
   Users,
-  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +23,11 @@ import { useI18n } from "@/i18n";
 const MIN_DURATION_SECONDS = 5 * 60; // 5 minutes
 const MAX_DURATION_SECONDS = 16 * 60; // 16 minutes
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
+const MAX_DESCRIPTION_WORDS = 75;
+const MIN_PORTFOLIO_WORDS = 50;
+const MAX_PORTFOLIO_WORDS = 150;
+const MAX_GENRES = 3;
+const AWARDS = ["Impact award", "Visual award", "Tech award"] as const;
 
 export const Route = createFileRoute("/upload")({
   component: SubmitPage,
@@ -33,18 +37,37 @@ export const Route = createFileRoute("/upload")({
 type Participant = {
   full_name: string;
   email: string;
+  phone: string;
   dob: string;
   role: string;
 };
 
-const emptyP: Participant = { full_name: "", email: "", dob: "", role: "" };
+const emptyP: Participant = { full_name: "", email: "", phone: "", dob: "", role: "" };
 
 const participantSchema = z.object({
   full_name: z.string().trim().min(2).max(120),
   email: z.string().email().max(255),
+  phone: z.string().trim().min(5).max(40),
   dob: z.string().min(4),
   role: z.string().trim().min(2).max(120),
 });
+
+function countWords(value: string) {
+  return value.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function limitWords(value: string, maxWords: number) {
+  const words = value.trim().split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return value;
+  return words.slice(0, maxWords).join(" ");
+}
+
+function parseGenres(value: string) {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 function SubmitPage() {
   const { user, loading } = useAuth();
@@ -69,6 +92,8 @@ function SubmitPage() {
   const [genres, setGenres] = useState("");
   const [reach, setReach] = useState("");
   const [connect, setConnect] = useState("");
+  const [awardOrder, setAwardOrder] = useState<string[]>([...AWARDS]);
+  const [helpers, setHelpers] = useState<string[]>([]);
 
   const [participants, setParticipants] = useState<Participant[]>([
     { ...emptyP },
@@ -77,6 +102,10 @@ function SubmitPage() {
   ]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
+  const descriptionWords = countWords(description);
+  const reachWords = countWords(reach);
+  const connectWords = countWords(connect);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -132,6 +161,58 @@ function SubmitPage() {
     setParticipants([...participants, { ...emptyP }]);
   };
 
+  const addHelper = () => {
+    if (helpers.length >= 10) return;
+    setHelpers([...helpers, ""]);
+  };
+
+  const updateHelper = (i: number, value: string) => {
+    setHelpers((arr) => arr.map((helper, idx) => (idx === i ? value : helper)));
+  };
+
+  const removeHelper = (i: number) => {
+    setHelpers((arr) => arr.filter((_, idx) => idx !== i));
+  };
+
+  const updateAwardOrder = (index: number, value: string) => {
+    setAwardOrder((arr) => {
+      const next = [...arr];
+      const old = next[index];
+      const duplicateIndex = next.findIndex((award) => award === value);
+      next[index] = value;
+      if (duplicateIndex !== -1 && duplicateIndex !== index) next[duplicateIndex] = old;
+      return next;
+    });
+  };
+
+  const updateDescription = (value: string) => {
+    if (countWords(value) > MAX_DESCRIPTION_WORDS) {
+      setDescription(limitWords(value, MAX_DESCRIPTION_WORDS));
+      toast.info(`Краткое описание: максимум ${MAX_DESCRIPTION_WORDS} слов`);
+      return;
+    }
+    setDescription(value);
+  };
+
+  const updateGenres = (value: string) => {
+    const parsed = parseGenres(value);
+    if (parsed.length > MAX_GENRES) {
+      setGenres(parsed.slice(0, MAX_GENRES).join(", "));
+      toast.info(`Жанры: максимум ${MAX_GENRES}`);
+      return;
+    }
+    setGenres(value);
+  };
+
+  const validateWordRange = (value: string, label: string) => {
+    const words = countWords(value);
+    if (words < MIN_PORTFOLIO_WORDS || words > MAX_PORTFOLIO_WORDS) {
+      toast.error(`${label}: от ${MIN_PORTFOLIO_WORDS} до ${MAX_PORTFOLIO_WORDS} слов`);
+      return false;
+    }
+    return true;
+  };
+
   const removeParticipant = (i: number) => {
     if (i < 3) return; // first 3 required
     setParticipants(participants.filter((_, idx) => idx !== i));
@@ -143,12 +224,19 @@ function SubmitPage() {
     if (!asDraft) {
       if (!video) return toast.error(t("sub_video"));
       if (!title.trim()) return toast.error(t("sub_film_title"));
+      if (countWords(description) > MAX_DESCRIPTION_WORDS) {
+        return toast.error(`Краткое описание: максимум ${MAX_DESCRIPTION_WORDS} слов`);
+      }
+      if (parseGenres(genres).length > MAX_GENRES) {
+        return toast.error(`Жанры: максимум ${MAX_GENRES}`);
+      }
+      if (!validateWordRange(reach, "Reach")) return;
+      if (!validateWordRange(connect, "Connect")) return;
       if (!theme) return toast.error(t("sub_theme"));
       if (durationStatus === "too-short") return toast.error(t("sub_err_duration_min"));
       if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
 
       // first 3 participants required
-      const currentYear = new Date().getFullYear();
       for (let i = 0; i < 3; i++) {
         const p = participantSchema.safeParse(participants[i]);
         if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
@@ -227,17 +315,19 @@ function SubmitPage() {
         setProgress(85);
       }
 
-      const tagArr = genres
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .slice(0, 12);
+      const tagArr = parseGenres(genres).slice(0, MAX_GENRES);
 
-      if (!videoPath) {
+      if (!asDraft && !videoPath) {
         toast.warning("Загрузите видео перед отправкой");
         setBusy(false);
         return;
       }
+
+      const trimmedHelpers = helpers.map((helper) => helper.trim()).filter(Boolean);
+      const submissionMeta = {
+        award_order: awardOrder,
+        helpers: trimmedHelpers,
+      };
 
       const payload = {
         user_id: user.id,
@@ -247,12 +337,12 @@ function SubmitPage() {
         // Store in both `genres` (tournament logic) and `tags` (UI display / explore filter)
         genres: tagArr,
         tags: tagArr,
-        conditions_log: null,
+        conditions_log: JSON.stringify(submissionMeta),
         portfolio_reach: reach.trim() || null,
         portfolio_connect: connect.trim() || null,
         portfolio_doc_path: docPath,
         participants: participants.filter((p) => Object.values(p).some((v) => v.trim())),
-        video_path: videoPath,
+        video_path: videoPath || "",
         thumb_path: thumbPath,
         duration_seconds: duration,
         submitted: !asDraft,
@@ -274,7 +364,7 @@ function SubmitPage() {
       setProgress(100);
       if (asDraft) {
         toast.success("Черновик сохранён");
-        navigate({ to: "/watch/$id", params: { id: inserted.id } });
+        navigate({ to: "/dashboard" });
       } else {
         toast.success("Заявка отправлена и ждёт модерации администратора", { duration: 6000 });
         navigate({ to: "/dashboard" });
@@ -304,10 +394,9 @@ function SubmitPage() {
         </div>
       </header>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <RuleCard icon={<Clock className="h-4 w-4" />} label="Хронометраж" value="5–16 минут" />
         <RuleCard icon={<Users className="h-4 w-4" />} label="Команда" value="3–7 человек" />
-        <RuleCard icon={<Trophy className="h-4 w-4" />} label="Доп. баллы" value="не начисляются" />
       </div>
 
       <form
@@ -419,19 +508,34 @@ function SubmitPage() {
             </div>
           </div>
 
-          <Textarea label={t("sub_desc")} value={description} onChange={setDescription} rows={4} />
+          <Textarea
+            label={`${t("sub_desc")} (${descriptionWords}/${MAX_DESCRIPTION_WORDS})`}
+            value={description}
+            onChange={updateDescription}
+            rows={4}
+          />
           <Input
             label={t("sub_genres")}
             value={genres}
-            onChange={setGenres}
+            onChange={updateGenres}
             placeholder="drama, noir, doc"
           />
         </Section>
 
         {/* SECTION: PORTFOLIO */}
         <Section title={t("sub_portfolio")} hint={t("sub_portfolio_hint")}>
-          <Textarea label={t("sub_reach")} value={reach} onChange={setReach} rows={4} />
-          <Textarea label={t("sub_connect")} value={connect} onChange={setConnect} rows={4} />
+          <Textarea
+            label={`${t("sub_reach")} (${reachWords}/${MAX_PORTFOLIO_WORDS})`}
+            value={reach}
+            onChange={setReach}
+            rows={4}
+          />
+          <Textarea
+            label={`${t("sub_connect")} (${connectWords}/${MAX_PORTFOLIO_WORDS})`}
+            value={connect}
+            onChange={setConnect}
+            rows={4}
+          />
 
           <div
             onClick={() => docRef.current?.click()}
@@ -451,8 +555,37 @@ function SubmitPage() {
           </div>
         </Section>
 
+        <Section
+          title="Порядок кинонаград"
+          hint="Выставьте Impact, Visual и Tech award по приоритету."
+        >
+          <div className="grid gap-3 sm:grid-cols-3">
+            {awardOrder.map((award, i) => (
+              <label key={i} className="block">
+                <span className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+                  #{i + 1}
+                </span>
+                <select
+                  value={award}
+                  onChange={(e) => updateAwardOrder(i, e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none transition-all focus:border-[var(--neon)] focus:bg-white/10"
+                >
+                  {AWARDS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        </Section>
+
         {/* SECTION: PARTICIPANTS */}
-        <Section title={t("sub_participants")} hint={t("sub_participants_hint")}>
+        <Section
+          title={t("sub_participants")}
+          hint={`${t("sub_participants_hint")}. ФИО участников, помощников и роли заполняйте латиницей.`}
+        >
           <div className="space-y-4">
             {participants.map((p, i) => (
               <div key={i} className="glass rounded-2xl p-5">
@@ -483,10 +616,18 @@ function SubmitPage() {
                     type="email"
                   />
                   <Input
+                    label={t("sub_p_phone")}
+                    value={p.phone}
+                    onChange={(v) => updateParticipant(i, "phone", v)}
+                    type="tel"
+                  />
+                  <Input
                     label={t("sub_p_dob")}
                     value={p.dob}
                     onChange={(v) => updateParticipant(i, "dob", v)}
                     type="date"
+                    min="2003-01-01"
+                    max={`${currentYear}-12-31`}
                   />
                   <Input
                     label={t("sub_p_role")}
@@ -502,6 +643,42 @@ function SubmitPage() {
                 variant="glass"
                 size="lg"
                 onClick={addParticipant}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4" /> +
+              </Button>
+            )}
+          </div>
+        </Section>
+
+        <Section
+          title="Помощники проекта"
+          hint="Можно указать до 10 человек, оказывавших содействие. Только ФИО на английском."
+        >
+          <div className="space-y-3">
+            {helpers.map((helper, i) => (
+              <div key={i} className="flex gap-3">
+                <Input
+                  label={`#${i + 1}`}
+                  value={helper}
+                  onChange={(v) => updateHelper(i, v)}
+                  placeholder="Full name in English"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeHelper(i)}
+                  className="mt-7 grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-muted-foreground hover:text-foreground"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {helpers.length < 10 && (
+              <Button
+                type="button"
+                variant="glass"
+                size="lg"
+                onClick={addHelper}
                 className="w-full"
               >
                 <Plus className="h-4 w-4" /> +
@@ -585,12 +762,16 @@ function Input({
   onChange,
   placeholder,
   type = "text",
+  min,
+  max,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
+  min?: string;
+  max?: string;
 }) {
   return (
     <label className="block">
@@ -602,6 +783,8 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        min={min}
+        max={max}
         className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-[var(--neon)] focus:bg-white/10 focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon)_18%,transparent)]"
       />
     </label>

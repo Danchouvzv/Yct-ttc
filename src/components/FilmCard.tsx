@@ -8,7 +8,9 @@ export function FilmCard({ film }: { film: Tables<"films"> }) {
   const thumbUrl = film.thumb_path
     ? supabase.storage.from("thumbs").getPublicUrl(film.thumb_path).data.publicUrl
     : null;
-  const videoUrl = supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl;
+  const videoUrl = film.video_path
+    ? supabase.storage.from("films").getPublicUrl(film.video_path).data.publicUrl
+    : null;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hovering, setHovering] = useState(false);
@@ -49,14 +51,16 @@ export function FilmCard({ film }: { film: Tables<"films"> }) {
         )}
 
         {/* Hover preview video */}
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          muted
-          playsInline
-          preload="none"
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${hovering ? "opacity-100" : "opacity-0"}`}
-        />
+        {videoUrl && (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            muted
+            playsInline
+            preload="none"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${hovering ? "opacity-100" : "opacity-0"}`}
+          />
+        )}
 
         {/* Letterbox overlay */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-4 bg-black/95" />
