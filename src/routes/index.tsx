@@ -11,6 +11,7 @@ import {
   Globe2,
   FileDown,
   Film as FilmIcon,
+  Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
@@ -109,6 +110,12 @@ function Index() {
                 <Play className="h-5 w-5" />
                 {t("hero_cta_explore")}
               </Link>
+            </Button>
+            <Button asChild variant="glass" size="xl">
+              <a href="https://www.instagram.com/young.cinema.tournament/" target="_blank" rel="noopener noreferrer">
+                <Instagram className="h-5 w-5" />
+                Instagram
+              </a>
             </Button>
           </div>
         </div>
