@@ -224,7 +224,7 @@ function Index() {
             <div className="grid gap-4 self-center">
               <ProjectCard title={t("tc_project_yrt")} note={t("tc_project_yrt_note")} />
               <ProjectCard title={t("tc_project_iat")} />
-              <ProjectCard title={t("tc_project_nsb")} note={t("tc_project_nsb_note")} />
+              <ProjectCard title={t("tc_project_nsb")} />
               <ProjectCard title={t("tc_project_more")} />
             </div>
           </div>

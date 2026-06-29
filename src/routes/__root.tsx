@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { CinematicDecor } from "@/components/CinematicDecor";
 import { I18nProvider } from "@/i18n";
 
@@ -128,6 +129,7 @@ function RootComponent() {
             <main className="relative">
               <Outlet />
             </main>
+            <Footer />
             <Toaster richColors position="top-center" />
           </div>
         </AuthProvider>

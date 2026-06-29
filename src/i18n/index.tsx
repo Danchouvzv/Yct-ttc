@@ -105,14 +105,9 @@ const D: Dict = {
     en: "International Adventurers Tournament",
   },
   tc_project_nsb: {
-    ru: "National Science Battles",
-    kk: "National Science Battles",
-    en: "National Science Battles",
-  },
-  tc_project_nsb_note: {
-    ru: "современно с Beyond Curriculum",
-    kk: "Beyond Curriculum-пен заманауи",
-    en: "modern with Beyond Curriculum",
+    ru: "International Young Scientists Battles",
+    kk: "International Young Scientists Battles",
+    en: "International Young Scientists Battles",
   },
   tc_project_more: { ru: "И другие", kk: "Және басқалары", en: "And others" },
   featured_kicker: { ru: "Авант-премьера", kk: "Авант-премьера", en: "Avant-Première" },
@@ -233,6 +228,16 @@ const D: Dict = {
     kk: "Сұраныс бойынша ештеңе табылмады",
     en: "No results for your query",
   },
+
+  // footer
+  footer_contacts: { ru: "Контакты", kk: "Байланыс", en: "Contacts" },
+  footer_tagline: {
+    ru: "Международный кино-турнир для молодых авторов.",
+    kk: "Жас авторларға арналған халықаралық кино-турнир.",
+    en: "International film tournament for young authors.",
+  },
+  footer_contact_alina: { ru: "Связаться — Алина", kk: "Хабарласу — Алина", en: "Contact — Alina" },
+  footer_rights: { ru: "Все права защищены.", kk: "Барлық құқықтар қорғалған.", en: "All rights reserved." },
 };
 
 const Ctx = createContext<{
