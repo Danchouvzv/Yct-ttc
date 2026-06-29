@@ -5,7 +5,7 @@ const EMAIL = "aurelion.alliance@gmail.com";
 const INSTAGRAM =
   "https://www.instagram.com/young.cinema.tournament?igsh=MXQ4am03dm9kbXRneg%3D%3D&utm_source=qr";
 const TELEGRAM_CHANNEL = "https://t.me/YCT_yct";
-const TELEGRAM_ALINA = "https://t.me/YCT_yct";
+const TELEGRAM_ALINA = "https://t.me/alik020";
 
 export function Footer() {
   const { t } = useI18n();
