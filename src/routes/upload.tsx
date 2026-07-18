@@ -27,7 +27,7 @@ const MAX_DESCRIPTION_WORDS = 75;
 const MIN_PORTFOLIO_WORDS = 50;
 const MAX_PORTFOLIO_WORDS = 150;
 const MAX_GENRES = 3;
-const AWARDS = ["Impact award", "Visual award", "Tech award"] as const;
+const AWARDS = ["Impact award", "Tech award"] as const;
 
 export const Route = createFileRoute("/upload")({
   component: SubmitPage,

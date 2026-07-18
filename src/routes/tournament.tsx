@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/use-reveal";
 import { useI18n, type Lang } from "@/i18n";
-import { formatDeadline, timeUntilDeadline, isSubmissionsOpen } from "@/lib/tournament";
+import { formatDeadline, formatRegistrationDeadline, timeUntilDeadline, isSubmissionsOpen, isRegistrationOpen } from "@/lib/tournament";
 
 export const Route = createFileRoute("/tournament")({
   component: TournamentPage,
@@ -47,10 +47,15 @@ const C: Record<string, Copy> = {
     kk: "Халықаралық қысқаметражды кино турнирі. Команда жинап, екі тақырыптың біріне фильм түсіріп, жүлде қоры үшін сайысқа түсіңіз.",
     en: "An international short-film tournament. Build a team, make a film on one of two themes and compete for the prize fund.",
   },
-  deadline_open: {
-    ru: "Приём заявок открыт до",
-    kk: "Өтінім қабылдау мерзімі",
-    en: "Submissions are open until",
+  reg_deadline_label: {
+    ru: "Регистрация до",
+    kk: "Тіркелу мерзімі",
+    en: "Registration until",
+  },
+  film_deadline_label: {
+    ru: "Приём фильмов до",
+    kk: "Фильм қабылдау мерзімі",
+    en: "Film submissions until",
   },
   deadline_closed: {
     ru: "Приём заявок завершён",
@@ -153,19 +158,14 @@ const C: Record<string, Copy> = {
 
   film_awards_title: { ru: "Кинонаграды", kk: "Кинонаградалар", en: "Film Awards" },
   film_awards_intro: {
-    ru: "В Турнире есть 4 основные кинонаграды:",
-    kk: "Турнирде 4 негізгі кинонаграда бар:",
-    en: "The Tournament has 4 main film awards:",
+    ru: "В Турнире есть 3 основные кинонаграды:",
+    kk: "Турнирде 3 негізгі кинонаграда бар:",
+    en: "The Tournament has 3 main film awards:",
   },
   impact_desc: {
     ru: "за самый сильный эмоциональный и смысловой эффект. Оценивается то, насколько фильм цепляет зрителя, раскрывает тему и оставляет впечатление.",
     kk: "ең күшті эмоциялық және мағыналық әсер үшін. Фильмнің көрерменді қаншалықты баурайтыны, тақырыпты ашуы және әсер қалдыруы бағаланады.",
     en: "for the strongest emotional and conceptual impact. It evaluates how strongly the film engages the viewer, develops the theme and leaves an impression.",
-  },
-  visual_desc: {
-    ru: "за лучшее визуальное решение. Учитываются операторская работа, композиция, свет, цвет, стиль, локации и общая эстетика фильма.",
-    kk: "ең үздік визуалды шешім үшін. Операторлық жұмыс, композиция, жарық, түс, стиль, локациялар және фильмнің жалпы эстетикасы ескеріледі.",
-    en: "for the best visual solution. Camera work, composition, lighting, color, style, locations and the film's overall aesthetics are considered.",
   },
   tech_desc: {
     ru: "за техническое исполнение. Оцениваются монтаж, звук, сложность реализации, техническая аккуратность и изобретательность команды.",
@@ -183,9 +183,9 @@ const C: Record<string, Copy> = {
     en: "At the final stage, films are evaluated by the jury. For each award, points are calculated with different coefficients: each nomination gives the highest weight to its own direction.",
   },
   film_awards_p2: {
-    ru: "Например, для Impact award основной вес имеет эмоциональное и смысловое впечатление, для Visual award — визуальная часть, для Tech award — техническое исполнение.",
-    kk: "Мысалы, Impact award үшін негізгі салмақ эмоциялық және мағыналық әсерге, Visual award үшін визуалды бөлікке, Tech award үшін техникалық орындауға беріледі.",
-    en: "For example, Impact award gives the most weight to emotional and conceptual impact, Visual award to the visual component, and Tech award to technical execution.",
+    ru: "Например, для Impact award основной вес имеет эмоциональное и смысловое впечатление, для Tech award — техническое исполнение.",
+    kk: "Мысалы, Impact award үшін негізгі салмақ эмоциялық және мағыналық әсерге, Tech award үшін техникалық орындауға беріледі.",
+    en: "For example, Impact award gives the most weight to emotional and conceptual impact, and Tech award to technical execution.",
   },
   film_awards_p3: {
     ru: "Для Glorious award все критерии учитываются равномерно.",
@@ -296,9 +296,9 @@ const C: Record<string, Copy> = {
   },
   stage_3_title: { ru: "Финальный этап", kk: "Финалдық кезең", en: "Final Stage" },
   stage_3_body: {
-    ru: "Финал оценивает жюри. Фильмы соревнуются внутри своих направлений: Glorious award, Impact award, Visual award, Tech award. В каждом направлении награждаются три команды, набравшие наибольшее количество баллов.",
-    kk: "Финалды қазылар алқасы бағалайды. Фильмдер өз бағыттары бойынша сайысады: Glorious award, Impact award, Visual award, Tech award. Әр бағытта ең көп балл жинаған үш команда марапатталады.",
-    en: "The final is evaluated by the jury. Films compete within their directions: Glorious award, Impact award, Visual award and Tech award. In each direction, the three teams with the highest scores are awarded.",
+    ru: "Финал оценивает жюри. Фильмы соревнуются внутри своих направлений: Glorious award, Impact award, Tech award. В каждом направлении награждаются три команды, набравшие наибольшее количество баллов.",
+    kk: "Финалды қазылар алқасы бағалайды. Фильмдер өз бағыттары бойынша сайысады: Glorious award, Impact award, Tech award. Әр бағытта ең көп балл жинаған үш команда марапатталады.",
+    en: "The final is evaluated by the jury. Films compete within their directions: Glorious award, Impact award and Tech award. In each direction, the three teams with the highest scores are awarded.",
   },
   preference_title: {
     ru: "Порядок предпочтительных кинонаград",
@@ -306,9 +306,9 @@ const C: Record<string, Copy> = {
     en: "Preferred Film Awards Order",
   },
   preference_body: {
-    ru: "Команда указывает порядок приоритета для четырёх наград:",
-    kk: "Команда төрт награда үшін басымдық ретін көрсетеді:",
-    en: "The team specifies the priority order for the four awards:",
+    ru: "Команда указывает порядок приоритета для трёх наград:",
+    kk: "Команда үш награда үшін басымдық ретін көрсетеді:",
+    en: "The team specifies the priority order for the three awards:",
   },
   example: { ru: "Пример", kk: "Мысал", en: "Example" },
   languages_title: { ru: "Языки и темы", kk: "Тілдер мен тақырыптар", en: "Languages and Themes" },
@@ -335,9 +335,9 @@ const C: Record<string, Copy> = {
   download_docx: { ru: "Скачать DOCX", kk: "DOCX жүктеу", en: "Download DOCX" },
   final_title: { ru: "Готовы участвовать?", kk: "Қатысуға дайынсыз ба?", en: "Ready to join?" },
   final_body: {
-    ru: "Соберите команду, выберите тему и подайте заявку до",
-    kk: "Команда жинап, тақырып таңдап, өтінімді мына күнге дейін беріңіз:",
-    en: "Build a team, choose a theme and submit your application by",
+    ru: "Соберите команду, зарегистрируйтесь до 10 августа и загрузите фильм до",
+    kk: "Команда жинап, 10 тамызға дейін тіркеліп, фильмді мына күнге дейін жүктеңіз:",
+    en: "Build a team, register by 10 August and upload your film by",
   },
   signup: { ru: "Регистрация", kk: "Тіркелу", en: "Register" },
 };
@@ -346,6 +346,7 @@ function TournamentPage() {
   useReveal();
   const { lang } = useI18n();
   const open = isSubmissionsOpen();
+  const regOpen = isRegistrationOpen();
   const left = timeUntilDeadline();
   const tr = (key: keyof typeof C) => C[key][lang];
 
@@ -364,18 +365,32 @@ function TournamentPage() {
           {tr("intro")}
         </p>
 
-        <div className="mt-8 inline-flex flex-wrap items-center justify-center gap-3 glass rounded-2xl px-5 py-3 text-sm">
-          <CalendarClock className="h-4 w-4 text-accent" />
-          <span className="text-muted-foreground">
-            {open ? tr("deadline_open") : tr("deadline_closed")}{" "}
-          </span>
-          <span className="font-display">{formatDeadline(lang)}</span>
-          {open && (
-            <span className="text-accent">
-              · {tr("left")} {left.days}
-              {tr("days")} {left.hours}
-              {tr("hours")}
-            </span>
+        <div className="mt-8 inline-flex flex-col items-center gap-2 glass rounded-2xl px-5 py-3 text-sm">
+          {open || regOpen ? (
+            <>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <CalendarClock className="h-4 w-4 text-accent" />
+                <span className="text-muted-foreground">{tr("reg_deadline_label")}</span>
+                <span className="font-display">{formatRegistrationDeadline(lang)}</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <CalendarClock className="h-4 w-4 text-accent" />
+                <span className="text-muted-foreground">{tr("film_deadline_label")}</span>
+                <span className="font-display">{formatDeadline(lang)}</span>
+                {open && (
+                  <span className="text-accent">
+                    · {tr("left")} {left.days}
+                    {tr("days")} {left.hours}
+                    {tr("hours")}
+                  </span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-accent" />
+              <span className="text-muted-foreground">{tr("deadline_closed")}</span>
+            </div>
           )}
         </div>
 
@@ -430,7 +445,6 @@ function TournamentPage() {
         <Section icon={Award} title={tr("film_awards_title")}>
           <Paragraph>{tr("film_awards_intro")}</Paragraph>
           <AwardCard name="Impact award" body={tr("impact_desc")} />
-          <AwardCard name="Visual award" body={tr("visual_desc")} />
           <AwardCard name="Tech award" body={tr("tech_desc")} />
           <AwardCard name="Glorious award" body={tr("glorious_desc")} />
           <Paragraph>{tr("film_awards_p1")}</Paragraph>
@@ -487,11 +501,10 @@ function TournamentPage() {
 
         <Section icon={Award} title={tr("preference_title")}>
           <p className="text-sm text-foreground/85">{tr("preference_body")}</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <NomCard idx="01" name="Glorious Award" />
             <NomCard idx="02" name="Impact Award" />
-            <NomCard idx="03" name="Visual Award" />
-            <NomCard idx="04" name="Tech Award" />
+            <NomCard idx="03" name="Tech Award" />
           </div>
           <div className="mt-6 glass rounded-2xl p-5 text-sm">
             <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
@@ -500,7 +513,6 @@ function TournamentPage() {
             <ol className="mt-2 list-decimal pl-5 text-foreground/90">
               <li>Glorious Award</li>
               <li>Impact Award</li>
-              <li>Visual Award</li>
               <li>Tech Award</li>
             </ol>
           </div>
