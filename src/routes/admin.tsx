@@ -15,6 +15,8 @@ import {
   Trash2,
   UserPlus,
   UserMinus,
+  Mail,
+  Copy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -80,6 +82,7 @@ type Profile = {
   id: string;
   team_name: string | null;
   display_name: string | null;
+  email?: string | null;
   country: string | null;
   city: string | null;
   language: string | null;
@@ -119,7 +122,7 @@ function AdminPage() {
       </header>
 
       <Tabs defaultValue="films" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4">
+        <TabsList className="grid w-full max-w-3xl grid-cols-5">
           <TabsTrigger value="films">
             <FilmIcon className="mr-1 h-4 w-4" />
             Фильмы
@@ -127,6 +130,10 @@ function AdminPage() {
           <TabsTrigger value="teams">
             <Users className="mr-1 h-4 w-4" />
             Команды
+          </TabsTrigger>
+          <TabsTrigger value="contacts">
+            <Mail className="mr-1 h-4 w-4" />
+            Контакты
           </TabsTrigger>
           <TabsTrigger value="roles">
             <Shield className="mr-1 h-4 w-4" />
@@ -143,6 +150,9 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="teams" className="mt-6">
           <TeamsTab />
+        </TabsContent>
+        <TabsContent value="contacts" className="mt-6">
+          <ContactsTab />
         </TabsContent>
         <TabsContent value="roles" className="mt-6">
           <RolesTab currentUserId={user.id} />
@@ -572,6 +582,7 @@ function TeamsTab() {
       (p) =>
         (p.team_name ?? "").toLowerCase().includes(lower) ||
         (p.display_name ?? "").toLowerCase().includes(lower) ||
+        (p.email ?? "").toLowerCase().includes(lower) ||
         (p.country ?? "").toLowerCase().includes(lower) ||
         (p.city ?? "").toLowerCase().includes(lower),
     );
@@ -594,7 +605,7 @@ function TeamsTab() {
           <TableHeader>
             <TableRow>
               <TableHead>Команда</TableHead>
-              <TableHead>Контакт</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Страна / Город</TableHead>
               <TableHead>Язык</TableHead>
               <TableHead>Регистрация</TableHead>
@@ -621,7 +632,11 @@ function TeamsTab() {
                   {p.team_name ?? p.display_name ?? "—"}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {p.display_name ?? "—"}
+                  {p.email ? (
+                    <a href={`mailto:${p.email}`} className="hover:text-accent underline-offset-2 hover:underline">
+                      {p.email}
+                    </a>
+                  ) : "—"}
                 </TableCell>
                 <TableCell className="text-sm">
                   {[p.country, p.city].filter(Boolean).join(", ") || "—"}
@@ -638,6 +653,145 @@ function TeamsTab() {
         </Table>
       </div>
       <p className="text-xs text-muted-foreground">Всего команд: {filtered.length}</p>
+    </div>
+  );
+}
+
+/* ============================== CONTACTS ============================== */
+
+type ParticipantRow = { full_name?: string; email?: string; role?: string };
+
+function ContactsTab() {
+  const [q, setQ] = useState("");
+
+  const { data: films, isLoading: filmsLoading } = useQuery({
+    queryKey: ["admin-contacts-films"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("films")
+        .select("id, title, user_id, participants, submitted")
+        .eq("submitted", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as { id: string; title: string; user_id: string; participants: unknown; submitted: boolean }[];
+    },
+  });
+
+  const { data: profiles, isLoading: profilesLoading } = useQuery({
+    queryKey: ["admin-contacts-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, team_name, display_name");
+      if (error) throw error;
+      return data as { id: string; team_name: string | null; display_name: string | null }[];
+    },
+  });
+
+  const rows = useMemo(() => {
+    if (!films || !profiles) return [];
+    const profileMap = new Map(profiles.map((p) => [p.id, p]));
+    return films.map((film) => {
+      const profile = profileMap.get(film.user_id);
+      const teamName = profile?.team_name ?? profile?.display_name ?? "—";
+      const parts = Array.isArray(film.participants) ? (film.participants as ParticipantRow[]) : [];
+      const emails = parts.map((p) => p.email).filter((e): e is string => Boolean(e));
+      return { teamName, filmTitle: film.title, emails };
+    });
+  }, [films, profiles]);
+
+  const filtered = useMemo(() => {
+    if (!q) return rows;
+    const lower = q.toLowerCase();
+    return rows.filter(
+      (r) =>
+        r.teamName.toLowerCase().includes(lower) ||
+        r.filmTitle.toLowerCase().includes(lower) ||
+        r.emails.some((e) => e.toLowerCase().includes(lower)),
+    );
+  }, [rows, q]);
+
+  const allEmails = useMemo(() => [...new Set(rows.flatMap((r) => r.emails))], [rows]);
+
+  const copyAll = () => {
+    navigator.clipboard.writeText(allEmails.join(", "));
+    toast.success(`Скопировано ${allEmails.length} email`);
+  };
+
+  const isLoading = filmsLoading || profilesLoading;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Поиск по команде или email…"
+            className="pl-9"
+          />
+        </div>
+        <Button size="sm" variant="outline" onClick={copyAll} disabled={allEmails.length === 0}>
+          <Copy className="mr-1 h-4 w-4" />
+          Скопировать все ({allEmails.length})
+        </Button>
+      </div>
+
+      <div className="rounded-xl glass overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Команда / Фильм</TableHead>
+              <TableHead>Email участников</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
+                  Загрузка…
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
+                  Нет поданных заявок
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((row, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="font-medium">{row.teamName}</div>
+                  <div className="text-xs text-muted-foreground">{row.filmTitle}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                    {row.emails.length === 0 ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      row.emails.map((email) => (
+                        <a
+                          key={email}
+                          href={`mailto:${email}`}
+                          className="text-sm text-accent hover:underline underline-offset-2"
+                        >
+                          {email}
+                        </a>
+                      ))
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Команд: {filtered.length} · Уникальных email: {allEmails.length}
+      </p>
     </div>
   );
 }
