@@ -85,7 +85,7 @@ function Index() {
         <div className="sprocket pointer-events-none absolute left-0 right-0 top-14 h-3 opacity-60" />
         <div className="sprocket pointer-events-none absolute left-0 right-0 bottom-14 h-3 opacity-60" />
 
-        <div className="mx-auto max-w-3xl text-center animate-fade-up">
+        <div className="relative z-10 mx-auto max-w-3xl text-center animate-fade-up">
           <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
             <Trophy className="h-3.5 w-3.5 text-accent" />
             {t("hero_kicker")}

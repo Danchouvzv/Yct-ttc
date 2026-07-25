@@ -21,22 +21,26 @@ export function HalftoneBg({ className = "" }: HalftoneBgProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      <HalftoneDots
-        width={size.width}
-        height={size.height}
-        colorBack="#0c0d18"
-        colorFront="#a855f7"
-        size={0.8}
-        radius={1}
-        contrast={1}
-        grid="square"
-        type="holes"
-        inverted={true}
-        grainMixer={0.05}
-        grainOverlay={0.3}
-        speed={0}
-      />
+    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
+      <div ref={containerRef} className="absolute inset-0 opacity-25">
+        <HalftoneDots
+          width={size.width}
+          height={size.height}
+          colorBack="#0c0d18"
+          colorFront="#a855f7"
+          size={0.45}
+          radius={1}
+          contrast={0.6}
+          grid="square"
+          type="holes"
+          inverted={true}
+          grainMixer={0.05}
+          grainOverlay={0.15}
+          speed={0}
+        />
+      </div>
+      {/* Vignette so the headline and CTAs stay legible over the texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(12,13,24,0.85)_0%,rgba(12,13,24,0.55)_45%,rgba(12,13,24,0.2)_100%)]" />
     </div>
   );
 }
