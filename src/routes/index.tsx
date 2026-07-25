@@ -14,7 +14,6 @@ import {
   Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HalftoneBg } from "@/components/ui/halftone-bg";
 import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { FilmCard } from "@/components/FilmCard";
 import { useReveal } from "@/hooks/use-reveal";
@@ -80,12 +79,11 @@ function Index() {
   return (
     <div className="relative">
       {/* HERO */}
-      <section className="letterbox relative mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-white/5 px-4 pt-24 pb-28 sm:px-10 sm:pt-32 sm:pb-36">
-        <HalftoneBg />
+      <section className="letterbox relative mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-white/5 bg-black/30 px-4 pt-24 pb-28 sm:px-10 sm:pt-32 sm:pb-36">
         <div className="sprocket pointer-events-none absolute left-0 right-0 top-14 h-3 opacity-60" />
         <div className="sprocket pointer-events-none absolute left-0 right-0 bottom-14 h-3 opacity-60" />
 
-        <div className="relative z-10 mx-auto max-w-3xl text-center animate-fade-up">
+        <div className="mx-auto max-w-3xl text-center animate-fade-up">
           <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
             <Trophy className="h-3.5 w-3.5 text-accent" />
             {t("hero_kicker")}
