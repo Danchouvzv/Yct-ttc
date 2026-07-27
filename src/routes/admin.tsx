@@ -670,8 +670,7 @@ function ContactsTab() {
       const { data, error } = await supabase
         .from("films")
         .select("id, title, user_id, participants, submitted")
-        .eq("submitted", true)
-        .order("created_at", { ascending: false });
+        .eq("submitted", true);
       if (error) throw error;
       return data as { id: string; title: string; user_id: string; participants: unknown; submitted: boolean }[];
     },
@@ -682,21 +681,31 @@ function ContactsTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, team_name, display_name");
+        .select("id, team_name, display_name")
+        .not("team_name", "is", null)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as { id: string; team_name: string | null; display_name: string | null }[];
     },
   });
 
   const rows = useMemo(() => {
-    if (!films || !profiles) return [];
-    const profileMap = new Map(profiles.map((p) => [p.id, p]));
-    return films.map((film) => {
-      const profile = profileMap.get(film.user_id);
-      const teamName = profile?.team_name ?? profile?.display_name ?? "—";
+    if (!profiles) return [];
+    // Build a map: user_id → participant emails from submitted film
+    const filmEmailMap = new Map<string, { filmTitle: string; emails: string[] }>();
+    for (const film of films ?? []) {
       const parts = Array.isArray(film.participants) ? (film.participants as ParticipantRow[]) : [];
       const emails = parts.map((p) => p.email).filter((e): e is string => Boolean(e));
-      return { teamName, filmTitle: film.title, emails };
+      filmEmailMap.set(film.user_id, { filmTitle: film.title, emails });
+    }
+    return profiles.map((p) => {
+      const teamName = p.team_name ?? p.display_name ?? "—";
+      const filmData = filmEmailMap.get(p.id);
+      return {
+        teamName,
+        filmTitle: filmData?.filmTitle ?? null,
+        emails: filmData?.emails ?? [],
+      };
     });
   }, [films, profiles]);
 
@@ -706,7 +715,7 @@ function ContactsTab() {
     return rows.filter(
       (r) =>
         r.teamName.toLowerCase().includes(lower) ||
-        r.filmTitle.toLowerCase().includes(lower) ||
+        (r.filmTitle ?? "").toLowerCase().includes(lower) ||
         r.emails.some((e) => e.toLowerCase().includes(lower)),
     );
   }, [rows, q]);
@@ -742,35 +751,33 @@ function ContactsTab() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Команда / Фильм</TableHead>
+              <TableHead>Команда</TableHead>
               <TableHead>Email участников</TableHead>
+              <TableHead>Заявка</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
                   Загрузка…
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
-                  Нет поданных заявок
+                <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
+                  Нет зарегистрированных команд
                 </TableCell>
               </TableRow>
             )}
             {filtered.map((row, i) => (
               <TableRow key={i}>
-                <TableCell>
-                  <div className="font-medium">{row.teamName}</div>
-                  <div className="text-xs text-muted-foreground">{row.filmTitle}</div>
-                </TableCell>
+                <TableCell className="font-medium">{row.teamName}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {row.emails.length === 0 ? (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground text-sm">—</span>
                     ) : (
                       row.emails.map((email) => (
                         <a
@@ -783,6 +790,13 @@ function ContactsTab() {
                       ))
                     )}
                   </div>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {row.filmTitle ? (
+                    <span className="text-emerald-400">{row.filmTitle}</span>
+                  ) : (
+                    <span className="opacity-50">нет заявки</span>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

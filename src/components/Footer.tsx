@@ -1,7 +1,7 @@
 import { Mail, Instagram, Send, MessageCircle } from "lucide-react";
 import { useI18n } from "@/i18n";
 
-const EMAIL = "aurelion.alliance@gmail.com";
+const EMAIL = "young.cinema.tournament@gmail.com";
 const INSTAGRAM =
   "https://www.instagram.com/young.cinema.tournament?igsh=MXQ4am03dm9kbXRneg%3D%3D&utm_source=qr";
 const TELEGRAM_CHANNEL = "https://t.me/YCT_yct";
