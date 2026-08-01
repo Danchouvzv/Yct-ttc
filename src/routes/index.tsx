@@ -305,13 +305,13 @@ function InfoCard({
         </p>
       )}
       {sponsors && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="aspect-[3/2] rounded-md border border-dashed border-white/10 bg-white/[0.02]"
-            />
-          ))}
+        <div className="mt-4 flex flex-wrap gap-3">
+          <div className="h-14 rounded-md overflow-hidden bg-black flex items-center justify-center px-2">
+            <img src="/qazaqfilm.jpg" alt="QAZAQFILM" className="h-full w-auto object-contain" />
+          </div>
+          <div className="h-14 rounded-md overflow-hidden bg-white flex items-center justify-center px-2">
+            <img src="/nd-studio.jpg" alt="ND Studio" className="h-full w-auto object-contain" />
+          </div>
         </div>
       )}
     </div>
