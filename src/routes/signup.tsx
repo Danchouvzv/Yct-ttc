@@ -2,12 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Mail, Lock, Users, MapPin, Globe } from "lucide-react";
+import { Mail, Lock, Users, MapPin, Globe, CalendarX } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { AuthShell, Field } from "./login";
 import { useI18n } from "@/i18n";
+import { isRegistrationOpen } from "@/lib/tournament";
 
 export const Route = createFileRoute("/signup")({
   component: Signup,
@@ -82,6 +83,7 @@ function Signup() {
           city: values.city,
           language: values.language,
           display_name: values.team_name,
+          email: values.email,
         },
         { onConflict: "id" },
       );
@@ -103,6 +105,24 @@ function Signup() {
       navigate({ to: "/login" });
     }
   };
+
+  if (!isRegistrationOpen()) {
+    return (
+      <AuthShell title={t("signup_closed_title")} subtitle={t("hero_kicker")}>
+        <div className="flex flex-col items-center gap-6 py-4 text-center">
+          <span className="grid h-16 w-16 place-items-center rounded-2xl bg-accent/15 text-accent">
+            <CalendarX className="h-8 w-8" />
+          </span>
+          <p className="font-serif text-sm italic text-muted-foreground leading-relaxed">
+            {t("signup_closed_body")}
+          </p>
+          <Button asChild variant="hero" size="lg" className="w-full">
+            <Link to="/login">{t("nav_login")}</Link>
+          </Button>
+        </div>
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell title={t("signup_team_title")} subtitle={t("hero_kicker")}>

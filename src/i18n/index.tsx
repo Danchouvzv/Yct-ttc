@@ -203,6 +203,16 @@ const D: Dict = {
   signup_country: { ru: "Страна", kk: "Ел", en: "Country" },
   signup_city: { ru: "Город", kk: "Қала", en: "City" },
   signup_lang: { ru: "Язык", kk: "Тіл", en: "Language" },
+  signup_closed_title: {
+    ru: "Регистрация закрыта",
+    kk: "Тіркеу жабылды",
+    en: "Registration closed",
+  },
+  signup_closed_body: {
+    ru: "Приём заявок завершён 10 августа 2026 года. Если вы уже зарегистрированы — войдите в аккаунт и загрузите фильм до 15 августа.",
+    kk: "Тіркеу 2026 жылдың 10 тамызында аяқталды. Тіркелген болсаңыз — аккаунтқа кіріп, фильмді 15 тамызға дейін жүктеңіз.",
+    en: "Registration closed on August 10, 2026. If you already signed up — log in and submit your film before August 15.",
+  },
 
   // explore
   explore_kicker: { ru: "Подборка", kk: "Таңдау", en: "Selection" },
