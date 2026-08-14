@@ -18,7 +18,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
-import { Route as VoteFilmIdRouteImport } from './routes/vote.$filmId'
+import { Route as VoteRouteImport } from './routes/vote'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -65,9 +65,9 @@ const WatchIdRoute = WatchIdRouteImport.update({
   path: '/watch/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VoteFilmIdRoute = VoteFilmIdRouteImport.update({
-  id: '/vote/$filmId',
-  path: '/vote/$filmId',
+const VoteRoute = VoteRouteImport.update({
+  id: '/vote',
+  path: '/vote',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -81,7 +81,7 @@ export interface FileRoutesByFullPath {
   '/tournament': typeof TournamentRoute
   '/upload': typeof UploadRoute
   '/watch/$id': typeof WatchIdRoute
-  '/vote/$filmId': typeof VoteFilmIdRoute
+  '/vote': typeof VoteFilmIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -93,7 +93,7 @@ export interface FileRoutesByTo {
   '/tournament': typeof TournamentRoute
   '/upload': typeof UploadRoute
   '/watch/$id': typeof WatchIdRoute
-  '/vote/$filmId': typeof VoteFilmIdRoute
+  '/vote': typeof VoteFilmIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -106,7 +106,7 @@ export interface FileRoutesById {
   '/tournament': typeof TournamentRoute
   '/upload': typeof UploadRoute
   '/watch/$id': typeof WatchIdRoute
-  '/vote/$filmId': typeof VoteFilmIdRoute
+  '/vote': typeof VoteFilmIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,7 +120,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/upload'
     | '/watch/$id'
-    | '/vote/$filmId'
+    | '/vote'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,7 +132,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/upload'
     | '/watch/$id'
-    | '/vote/$filmId'
+    | '/vote'
   id:
     | '__root__'
     | '/'
@@ -144,7 +144,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/upload'
     | '/watch/$id'
-    | '/vote/$filmId'
+    | '/vote'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -157,7 +157,7 @@ export interface RootRouteChildren {
   TournamentRoute: typeof TournamentRoute
   UploadRoute: typeof UploadRoute
   WatchIdRoute: typeof WatchIdRoute
-  VoteFilmIdRoute: typeof VoteFilmIdRoute
+  VoteRoute: typeof VoteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,10 +225,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vote/$filmId': {
-      id: '/vote/$filmId'
-      path: '/vote/$filmId'
-      fullPath: '/vote/$filmId'
+    '/vote': {
+      id: '/vote'
+      path: '/vote'
+      fullPath: '/vote'
       preLoaderRoute: typeof VoteFilmIdRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -245,7 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   TournamentRoute: TournamentRoute,
   UploadRoute: UploadRoute,
   WatchIdRoute: WatchIdRoute,
-  VoteFilmIdRoute: VoteFilmIdRoute,
+  VoteRoute: VoteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

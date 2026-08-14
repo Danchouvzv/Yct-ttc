@@ -18,7 +18,6 @@ import {
   Mail,
   Copy,
   Tv2,
-  Star,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
@@ -951,12 +950,20 @@ function RolesTab({ currentUserId }: { currentUserId: string }) {
 /* ============================== SCREENING ============================== */
 
 const SCREENING_AWARDS = [
-  { key: "impact", name: "Impact Award", color: "text-violet-400" },
-  { key: "tech",   name: "Tech Award",   color: "text-sky-400"    },
+  { key: "glorious", name: "Glorious Award", color: "text-violet-400" },
+  { key: "impact",   name: "Impact Award",   color: "text-rose-400"   },
+  { key: "tech",     name: "Tech Award",     color: "text-sky-400"    },
 ] as const;
 
+// Points: 1st choice = 2pts, 2nd choice = 1pt
+function calcPoints(votes: { film_id: string; award: string; choice_rank: number }[], filmId: string, award: string) {
+  return votes
+    .filter((v) => v.film_id === filmId && v.award === award)
+    .reduce((s, v) => s + (v.choice_rank === 1 ? 2 : 1), 0);
+}
+
 function ScreeningTab() {
-  const [selectedFilmId, setSelectedFilmId] = useState<string>("");
+  const voteUrl = typeof window !== "undefined" ? `${window.location.origin}/vote` : "/vote";
 
   const { data: films, isLoading: filmsLoading } = useQuery({
     queryKey: ["screening-films"],
@@ -971,176 +978,97 @@ function ScreeningTab() {
     },
   });
 
-  const { data: votes, isLoading: votesLoading, refetch } = useQuery({
-    queryKey: ["screening-votes", selectedFilmId],
-    enabled: Boolean(selectedFilmId),
-    queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from("audience_votes")
-        .select("award, score")
-        .eq("film_id", selectedFilmId);
-      if (error) throw error;
-      return (data ?? []) as { award: string; score: number }[];
-    },
-  });
-
-  const voteUrl =
-    selectedFilmId
-      ? `${typeof window !== "undefined" ? window.location.origin : ""}/vote/${selectedFilmId}`
-      : "";
-
-  // Aggregate: per award → count + avg
-  const stats = SCREENING_AWARDS.map((a) => {
-    const awardVotes = (votes ?? []).filter((v) => v.award === a.key);
-    const avg = awardVotes.length
-      ? awardVotes.reduce((s, v) => s + v.score, 0) / awardVotes.length
-      : null;
-    return { ...a, count: awardVotes.length, avg };
-  });
-
-  const totalVoters = selectedFilmId
-    ? new Set((votes ?? []).map((_, i) => i)).size / SCREENING_AWARDS.length // rough unique estimate
-    : 0;
-
-  return (
-    <div className="space-y-6">
-      {/* Film selector */}
-      <div className="glass rounded-2xl p-6 space-y-4">
-        <h2 className="font-display text-lg flex items-center gap-2">
-          <Tv2 className="h-5 w-5 text-accent" />
-          Выберите фильм для показа
-        </h2>
-        <select
-          value={selectedFilmId}
-          onChange={(e) => setSelectedFilmId(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-[var(--neon)]"
-        >
-          <option value="">— выберите фильм —</option>
-          {filmsLoading && <option disabled>Загрузка…</option>}
-          {(films ?? []).map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.title}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {selectedFilmId && (
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* QR code */}
-          <div className="glass rounded-2xl p-6 flex flex-col items-center gap-4">
-            <h3 className="font-display text-base self-start">QR для зрителей</h3>
-            <div className="rounded-xl bg-white p-4">
-              <QRCodeSVG value={voteUrl} size={200} />
-            </div>
-            <p className="text-xs text-center text-muted-foreground break-all">{voteUrl}</p>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                navigator.clipboard.writeText(voteUrl);
-                toast.success("Ссылка скопирована");
-              }}
-            >
-              <Copy className="mr-1 h-4 w-4" />
-              Скопировать ссылку
-            </Button>
-          </div>
-
-          {/* Vote results */}
-          <div className="glass rounded-2xl p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-base">Результаты голосования</h3>
-              <Button size="sm" variant="ghost" onClick={() => refetch()} disabled={votesLoading}>
-                Обновить
-              </Button>
-            </div>
-
-            {votesLoading ? (
-              <p className="text-sm text-muted-foreground">Загрузка…</p>
-            ) : (
-              <>
-                {stats.map((s) => (
-                  <div key={s.key} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className={`font-medium ${s.color}`}>{s.name}</span>
-                      <span className="text-muted-foreground">{s.count} голосов</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 flex-1 rounded-full bg-white/10">
-                        <div
-                          className="h-2 rounded-full bg-accent transition-all"
-                          style={{ width: s.avg ? `${(s.avg / 5) * 100}%` : "0%" }}
-                        />
-                      </div>
-                      <span className="w-10 text-right text-sm font-display">
-                        {s.avg !== null ? s.avg.toFixed(1) : "—"}
-                      </span>
-                      <div className="flex">
-                        {[1,2,3,4,5].map((n) => (
-                          <Star
-                            key={n}
-                            className={`h-3.5 w-3.5 ${n <= Math.round(s.avg ?? 0) ? "fill-accent text-accent" : "text-white/20"}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <p className="text-xs text-muted-foreground pt-2 border-t border-white/10">
-                  Проголосовало устройств: ~{Math.round((votes ?? []).length / SCREENING_AWARDS.length)}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* All films results table */}
-      <div className="glass rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-          <h3 className="font-display text-base">Сводная таблица по всем фильмам</h3>
-        </div>
-        <AllFilmsResults films={films ?? []} />
-      </div>
-    </div>
-  );
-}
-
-function AllFilmsResults({ films }: { films: { id: string; title: string }[] }) {
-  const { data: allVotes, isLoading } = useQuery({
+  const { data: allVotes, isLoading: votesLoading, refetch } = useQuery({
     queryKey: ["all-audience-votes"],
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("audience_votes")
-        .select("film_id, award, score");
+        .select("film_id, award, choice_rank, voter_token");
       if (error) throw error;
-      return (data ?? []) as { film_id: string; award: string; score: number }[];
+      return (data ?? []) as { film_id: string; award: string; choice_rank: number; voter_token: string }[];
     },
   });
 
+  const totalVoters = new Set((allVotes ?? []).map((v) => v.voter_token)).size;
+
+  return (
+    <div className="space-y-6">
+      {/* QR panel */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="glass rounded-2xl p-6 flex flex-col items-center gap-4">
+          <div className="flex w-full items-center gap-2">
+            <Tv2 className="h-5 w-5 text-accent" />
+            <h2 className="font-display text-base">QR для зрительского голосования</h2>
+          </div>
+          <div className="rounded-xl bg-white p-4">
+            <QRCodeSVG value={voteUrl} size={200} />
+          </div>
+          <p className="text-xs text-center text-muted-foreground break-all">{voteUrl}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard.writeText(voteUrl);
+              toast.success("Ссылка скопирована");
+            }}
+          >
+            <Copy className="mr-1 h-4 w-4" />
+            Скопировать ссылку
+          </Button>
+        </div>
+
+        <div className="glass rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-base">Статистика</h3>
+            <Button size="sm" variant="ghost" onClick={() => refetch()} disabled={votesLoading}>
+              Обновить
+            </Button>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-4xl font-display text-accent">{totalVoters}</span>
+            <span className="text-sm text-muted-foreground">зрителей проголосовали</span>
+          </div>
+          <p className="text-xs text-muted-foreground italic">
+            Схема: 1-й выбор = 2 очка, 2-й выбор = 1 очко
+          </p>
+        </div>
+      </div>
+
+      {/* Results table */}
+      <div className="glass rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="font-display text-base">Результаты по фильмам</h3>
+        </div>
+        <AllFilmsResults films={films ?? []} votes={allVotes ?? []} isLoading={filmsLoading || votesLoading} />
+      </div>
+    </div>
+  );
+}
+
+type VoteRow = { film_id: string; award: string; choice_rank: number; voter_token: string };
+
+function AllFilmsResults({
+  films,
+  votes,
+  isLoading,
+}: {
+  films: { id: string; title: string }[];
+  votes: VoteRow[];
+  isLoading: boolean;
+}) {
   const rows = films.map((f) => {
-    const fv = (allVotes ?? []).filter((v) => v.film_id === f.id);
-    const perAward = SCREENING_AWARDS.map((a) => {
-      const av = fv.filter((v) => v.award === a.key);
-      return {
-        key: a.key,
-        name: a.name,
-        color: a.color,
-        avg: av.length ? av.reduce((s, v) => s + v.score, 0) / av.length : null,
-        count: av.length,
-      };
-    });
-    const totalScore = perAward.every((a) => a.avg !== null)
-      ? perAward.reduce((s, a) => s + (a.avg ?? 0), 0) / perAward.length
-      : null;
-    return { film: f, perAward, totalScore, voters: Math.round(fv.length / SCREENING_AWARDS.length) };
+    const perAward = SCREENING_AWARDS.map((a) => ({
+      key: a.key,
+      name: a.name,
+      color: a.color,
+      pts: calcPoints(votes, f.id, a.key),
+    }));
+    const totalPts = perAward.reduce((s, a) => s + a.pts, 0);
+    return { film: f, perAward, totalPts };
   });
 
-  // Sort by totalScore desc
-  rows.sort((a, b) => (b.totalScore ?? -1) - (a.totalScore ?? -1));
+  rows.sort((a, b) => b.totalPts - a.totalPts);
 
   return (
     <Table>
@@ -1151,47 +1079,43 @@ function AllFilmsResults({ films }: { films: { id: string; title: string }[] }) 
           {SCREENING_AWARDS.map((a) => (
             <TableHead key={a.key} className={a.color}>{a.name}</TableHead>
           ))}
-          <TableHead>Итог</TableHead>
-          <TableHead className="text-right">Зрит.</TableHead>
+          <TableHead className="text-right">Итог</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {isLoading && (
           <TableRow>
-            <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
+            <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
               Загрузка…
             </TableCell>
           </TableRow>
         )}
         {!isLoading && rows.length === 0 && (
           <TableRow>
-            <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
+            <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
               Нет фильмов
             </TableCell>
           </TableRow>
         )}
         {rows.map((row, idx) => (
           <TableRow key={row.film.id}>
-            <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+            <TableCell className="text-muted-foreground font-display">{idx + 1}</TableCell>
             <TableCell className="font-medium">{row.film.title}</TableCell>
             {row.perAward.map((a) => (
               <TableCell key={a.key} className="text-sm">
-                {a.avg !== null ? (
-                  <span className={`font-display ${a.color}`}>{a.avg.toFixed(1)}</span>
+                {a.pts > 0 ? (
+                  <span className={`font-display ${a.color}`}>{a.pts} pts</span>
                 ) : (
-                  <span className="text-muted-foreground/50">—</span>
+                  <span className="text-muted-foreground/40">—</span>
                 )}
               </TableCell>
             ))}
-            <TableCell>
-              {row.totalScore !== null ? (
-                <span className="font-display text-accent">{row.totalScore.toFixed(1)}</span>
+            <TableCell className="text-right">
+              {row.totalPts > 0 ? (
+                <span className="font-display text-accent">{row.totalPts} pts</span>
               ) : (
                 <span className="text-muted-foreground/50">—</span>
               )}
-            </TableCell>
-            <TableCell className="text-right text-muted-foreground text-sm">
-              {row.voters || "—"}
             </TableCell>
           </TableRow>
         ))}
