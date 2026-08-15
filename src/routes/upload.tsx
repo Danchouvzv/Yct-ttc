@@ -24,8 +24,8 @@ const MIN_DURATION_SECONDS = 5 * 60; // 5 minutes
 const MAX_DURATION_SECONDS = 16 * 60; // 16 minutes
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
 const MAX_DESCRIPTION_WORDS = 75;
-const MIN_PORTFOLIO_WORDS = 50;
-const MAX_PORTFOLIO_WORDS = 150;
+const MIN_PORTFOLIO_WORDS = 10;
+const MAX_PORTFOLIO_WORDS = 300;
 const MAX_GENRES = 3;
 const AWARDS = ["Impact award", "Tech award"] as const;
 
@@ -369,8 +369,8 @@ function SubmitPage() {
       if (parseGenres(genres).length > MAX_GENRES) {
         return toast.error(`Жанры: максимум ${MAX_GENRES}`);
       }
-      if (!validateWordRange(reach, "Reach")) return;
-      if (!validateWordRange(connect, "Connect")) return;
+      if (reach.trim() && !validateWordRange(reach, "Reach")) return;
+      if (connect.trim() && !validateWordRange(connect, "Connect")) return;
       if (!theme) return toast.error(t("sub_theme"));
       if (durationStatus === "too-short") return toast.error(t("sub_err_duration_min"));
       if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
