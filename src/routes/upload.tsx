@@ -374,26 +374,15 @@ function SubmitPage() {
       if (!theme) return toast.error(t("sub_theme"));
       if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
 
-      // first 3 participants required
-      for (let i = 0; i < 3; i++) {
-        const p = participantSchema.safeParse(participants[i]);
-        if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
-        // Check DOB: must be born from 2003 through the current year inclusive
-        const dobYear = new Date(participants[i].dob).getFullYear();
-        if (!isNaN(dobYear) && (dobYear < 2003 || dobYear > currentYear)) {
-          return toast.error(`#${i + 1}: год рождения должен быть с 2003 по текущий`);
-        }
-      }
-      // optional: validate the rest if any field filled
-      for (let i = 3; i < participants.length; i++) {
+      // at least 1 participant required
+      const p0 = participantSchema.safeParse(participants[0]);
+      if (!p0.success) return toast.error(`#1: ${p0.error.issues[0].message}`);
+      // validate optional participants if any field is filled
+      for (let i = 1; i < participants.length; i++) {
         const has = Object.values(participants[i]).some((v) => v.trim());
         if (has) {
           const p = participantSchema.safeParse(participants[i]);
           if (!p.success) return toast.error(`#${i + 1}: ${p.error.issues[0].message}`);
-          const dobYear = new Date(participants[i].dob).getFullYear();
-          if (!isNaN(dobYear) && (dobYear < 2003 || dobYear > currentYear)) {
-            return toast.error(`#${i + 1}: год рождения должен быть с 2003 по текущий`);
-          }
         }
       }
     }
@@ -764,8 +753,6 @@ function SubmitPage() {
                     value={p.dob}
                     onChange={(v) => updateParticipant(i, "dob", v)}
                     type="date"
-                    min="2003-01-01"
-                    max={`${currentYear}-12-31`}
                   />
                   <Input
                     label={t("sub_p_role")}
