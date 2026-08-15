@@ -18,6 +18,7 @@ import {
   Mail,
   Copy,
   Tv2,
+  RotateCcw,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
@@ -260,6 +261,16 @@ function FilmsTab() {
     qc.invalidateQueries({ queryKey: ["admin-films"] });
   }
 
+  async function revertToDraft(id: string) {
+    const { error } = await supabase
+      .from("films")
+      .update({ submitted: false, submitted_at: null, status: "pending" })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Заявка возвращена в черновик — участник может перезалить файл");
+    qc.invalidateQueries({ queryKey: ["admin-films"] });
+  }
+
   async function removeFilm(id: string) {
     const { error } = await supabase.from("films").delete().eq("id", id);
     if (error) return toast.error(error.message);
@@ -350,6 +361,16 @@ function FilmsTab() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <FilmDetailsDialog film={f} onUpdate={updateStatus} />
+                    {f.submitted && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Вернуть в черновик (участник сможет перезалить)"
+                        onClick={() => revertToDraft(f.id)}
+                      >
+                        <RotateCcw className="h-4 w-4 text-amber-400" />
+                      </Button>
+                    )}
                     <Button
                       size="icon"
                       variant="ghost"
