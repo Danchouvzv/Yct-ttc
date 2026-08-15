@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 
-const MIN_DURATION_SECONDS = 5 * 60; // 5 minutes
+const MIN_DURATION_SECONDS = 4 * 60 + 30; // 4:30 — allow borderline 5-min films
 const MAX_DURATION_SECONDS = 16 * 60; // 16 minutes
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
 const MAX_DESCRIPTION_WORDS = 75;
@@ -372,7 +372,6 @@ function SubmitPage() {
       if (reach.trim() && !validateWordRange(reach, "Reach")) return;
       if (connect.trim() && !validateWordRange(connect, "Connect")) return;
       if (!theme) return toast.error(t("sub_theme"));
-      if (durationStatus === "too-short") return toast.error(t("sub_err_duration_min"));
       if (durationStatus === "too-long") return toast.error(t("sub_err_duration_max"));
 
       // first 3 participants required
@@ -851,7 +850,7 @@ function SubmitPage() {
             variant="hero"
             size="xl"
             className="flex-1"
-            disabled={busy || (durationStatus !== null && durationStatus !== "ok")}
+            disabled={busy}
           >
             <Send className="h-5 w-5" /> {busy ? t("sub_sending") : t("sub_send")}
           </Button>
