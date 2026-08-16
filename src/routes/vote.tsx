@@ -72,7 +72,6 @@ function VotePage() {
         .from("films")
         .select("id, title")
         .eq("submitted", true)
-        .eq("status", "approved")
         .order("title");
       if (error) throw error;
       return data as { id: string; title: string }[];
