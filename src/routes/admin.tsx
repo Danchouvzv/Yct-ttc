@@ -1106,14 +1106,14 @@ function AllFilmsResults({
       <TableBody>
         {isLoading && (
           <TableRow>
-            <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+            <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
               Загрузка…
             </TableCell>
           </TableRow>
         )}
         {!isLoading && rows.length === 0 && (
           <TableRow>
-            <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+            <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
               Нет фильмов
             </TableCell>
           </TableRow>
