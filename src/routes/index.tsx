@@ -309,6 +309,9 @@ function InfoCard({
           <div className="h-14 rounded-md overflow-hidden bg-white flex items-center justify-center px-2">
             <img src="/nd-studio.jpg" alt="ND Studio" className="h-full w-auto object-contain" />
           </div>
+          <div className="h-14 rounded-md overflow-hidden flex items-center justify-center px-2">
+            <img src="/rakurs-rent.jpg" alt="Rakurs Rent" className="h-full w-auto object-contain" />
+          </div>
         </div>
       )}
     </div>
