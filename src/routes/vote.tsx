@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { VOTING_OPEN } from "@/lib/tournament";
 
 export const Route = createFileRoute("/vote")({
   component: VotePage,
@@ -121,6 +122,20 @@ function VotePage() {
     localStorage.setItem(VOTED_KEY, "1");
     setSubmitted(true);
   };
+
+  if (!VOTING_OPEN) {
+    return (
+      <div className="grid min-h-svh place-items-center px-4">
+        <div className="flex max-w-sm flex-col items-center gap-4 text-center">
+          <Lock className="h-16 w-16 text-muted-foreground" />
+          <h1 className="font-display text-2xl">Голосование завершено</h1>
+          <p className="font-serif text-muted-foreground italic">
+            Зрительское голосование YCT закрыто. Спасибо всем, кто принял участие!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

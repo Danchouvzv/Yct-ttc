@@ -12,6 +12,8 @@ export function isSubmissionsOpen(now: Date = new Date()): boolean {
   return now.getTime() < SUBMISSION_DEADLINE.getTime();
 }
 
+export const VOTING_OPEN = false;
+
 function formatDate(date: Date, lang: "ru" | "kk" | "en"): string {
   const locale = lang === "kk" ? "kk-KZ" : lang === "en" ? "en-US" : "ru-RU";
   return new Intl.DateTimeFormat(locale, {
