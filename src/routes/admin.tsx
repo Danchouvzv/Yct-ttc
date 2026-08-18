@@ -976,26 +976,31 @@ const SCREENING_AWARDS = [
   { key: "tech",     name: "Tech Award",     color: "text-sky-400"    },
 ] as const;
 
-// Points: 1st choice = 2pts, 2nd choice = 1pt
-function calcPoints(votes: { film_id: string; award: string; choice_rank: number }[], filmId: string, award: string) {
+function calcPoints(votes: VoteRow[], filmId: string, award: string) {
   return votes
     .filter((v) => v.film_id === filmId && v.award === award)
     .reduce((s, v) => s + (v.choice_rank === 1 ? 2 : 1), 0);
 }
 
+type ScreeningFilm = { id: string; title: string; session_number: number | null };
+type VoteRow = { film_id: string; award: string; choice_rank: number; user_id: string; session_number: number | null };
+
 function ScreeningTab() {
-  const voteUrl = typeof window !== "undefined" ? `${window.location.origin}/vote` : "/vote";
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const qc = useQueryClient();
+  const [assigning, setAssigning] = useState(false);
 
   const { data: films, isLoading: filmsLoading } = useQuery({
     queryKey: ["screening-films"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from("films")
-        .select("id, title")
+        .select("id, title, session_number")
         .eq("submitted", true)
         .order("title");
       if (error) throw error;
-      return data as { id: string; title: string }[];
+      return (data ?? []) as ScreeningFilm[];
     },
   });
 
@@ -1005,61 +1010,117 @@ function ScreeningTab() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("audience_votes")
-        .select("film_id, award, choice_rank, voter_token");
+        .select("film_id, award, choice_rank, user_id, session_number");
       if (error) throw error;
-      return (data ?? []) as { film_id: string; award: string; choice_rank: number; voter_token: string }[];
+      return (data ?? []) as VoteRow[];
     },
   });
 
-  const totalVoters = new Set((allVotes ?? []).map((v) => v.voter_token)).size;
+  // Group films by session_number
+  const sessions = useMemo(() => {
+    if (!films) return [];
+    const map = new Map<number, ScreeningFilm[]>();
+    for (const f of films) {
+      const sn = f.session_number ?? 0;
+      if (!map.has(sn)) map.set(sn, []);
+      map.get(sn)!.push(f);
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([sn, sf]) => ({ sn, films: sf }));
+  }, [films]);
+
+  const totalVoters = new Set((allVotes ?? []).map((v) => v.user_id)).size;
+
+  const assignSessions = async () => {
+    if (!films || films.length === 0) return;
+    setAssigning(true);
+    const sorted = [...films].sort((a, b) => a.title.localeCompare(b.title));
+    for (let i = 0; i < sorted.length; i++) {
+      const sn = Math.ceil((i + 1) / 6);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("films").update({ session_number: sn }).eq("id", sorted[i].id);
+    }
+    qc.invalidateQueries({ queryKey: ["screening-films"] });
+    toast.success(`Создано ${Math.ceil(sorted.length / 6)} сеансов`);
+    setAssigning(false);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* QR panel */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="glass rounded-2xl p-6 flex flex-col items-center gap-4">
-          <div className="flex w-full items-center gap-2">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg flex items-center gap-2">
             <Tv2 className="h-5 w-5 text-accent" />
-            <h2 className="font-display text-base">QR для зрительского голосования</h2>
-          </div>
-          <div className="rounded-xl bg-white p-4">
-            <QRCodeSVG value={voteUrl} size={200} />
-          </div>
-          <p className="text-xs text-center text-muted-foreground break-all">{voteUrl}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              navigator.clipboard.writeText(voteUrl);
-              toast.success("Ссылка скопирована");
-            }}
-          >
-            <Copy className="mr-1 h-4 w-4" />
-            Скопировать ссылку
-          </Button>
-        </div>
-
-        <div className="glass rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-base">Статистика</h3>
-            <Button size="sm" variant="ghost" onClick={() => refetch()} disabled={votesLoading}>
-              Обновить
-            </Button>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-4xl font-display text-accent">{totalVoters}</span>
-            <span className="text-sm text-muted-foreground">зрителей проголосовали</span>
-          </div>
-          <p className="text-xs text-muted-foreground italic">
-            Схема: 1-й выбор = 2 очка, 2-й выбор = 1 очко
+            Скрининг
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {totalVoters} зрит. проголосовали · {sessions.filter((s) => s.sn > 0).length} сеансов
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" onClick={() => refetch()} disabled={votesLoading}>
+            Обновить
+          </Button>
+          <Button size="sm" variant="outline" onClick={assignSessions} disabled={assigning || filmsLoading}>
+            {assigning ? "…" : "Создать сессии (по 6)"}
+          </Button>
         </div>
       </div>
 
+      {/* Sessions grid */}
+      {filmsLoading ? (
+        <p className="text-muted-foreground text-sm">Загрузка…</p>
+      ) : sessions.length === 0 ? (
+        <p className="text-muted-foreground text-sm">Нажмите «Создать сессии», чтобы разбить фильмы на группы по 6.</p>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {sessions.filter((s) => s.sn > 0).map(({ sn, films: sf }) => {
+            const sessionUrl = `${origin}/vote?session=${sn}`;
+            const sessionVotes = (allVotes ?? []).filter((v) => v.session_number === sn);
+            const voters = new Set(sessionVotes.map((v) => v.user_id)).size;
+            return (
+              <div key={sn} className="glass rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-accent text-sm uppercase tracking-widest">Сеанс {sn}</span>
+                  <span className="text-xs text-muted-foreground">{voters} голосов</span>
+                </div>
+
+                {/* QR */}
+                <div className="flex justify-center">
+                  <div className="rounded-xl bg-white p-3">
+                    <QRCodeSVG value={sessionUrl} size={140} />
+                  </div>
+                </div>
+                <p className="text-[10px] text-center text-muted-foreground break-all">{sessionUrl}</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => { navigator.clipboard.writeText(sessionUrl); toast.success("Ссылка скопирована"); }}
+                >
+                  <Copy className="mr-1 h-3 w-3" />
+                  Скопировать ссылку
+                </Button>
+
+                {/* Film list */}
+                <ul className="space-y-1">
+                  {sf.map((f) => (
+                    <li key={f.id} className="text-sm text-muted-foreground truncate">· {f.title}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Results table */}
       <div className="glass rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h3 className="font-display text-base">Результаты по фильмам</h3>
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+          <h3 className="font-display text-base">Итоговые результаты</h3>
+          <p className="text-xs text-muted-foreground italic">1-й выбор = 2 очка · 2-й выбор = 1 очко</p>
         </div>
         <AllFilmsResults films={films ?? []} votes={allVotes ?? []} isLoading={filmsLoading || votesLoading} />
       </div>
@@ -1067,14 +1128,12 @@ function ScreeningTab() {
   );
 }
 
-type VoteRow = { film_id: string; award: string; choice_rank: number; voter_token: string };
-
 function AllFilmsResults({
   films,
   votes,
   isLoading,
 }: {
-  films: { id: string; title: string }[];
+  films: ScreeningFilm[];
   votes: VoteRow[];
   isLoading: boolean;
 }) {
