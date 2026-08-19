@@ -1116,14 +1116,29 @@ function ScreeningTab() {
         </div>
       )}
 
-      {/* Results table */}
-      <div className="glass rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-          <h3 className="font-display text-base">Итоговые результаты</h3>
-          <p className="text-xs text-muted-foreground italic">1-й выбор = 2 очка · 2-й выбор = 1 очко</p>
+      {/* Per-session results */}
+      {sessions.filter((s) => s.sn > 0).length > 0 && (
+        <div className="space-y-4">
+          <h3 className="font-display text-base px-1">
+            Результаты по сеансам
+            <span className="ml-2 text-xs font-normal text-muted-foreground italic">1-й выбор = 2 очка · 2-й выбор = 1 очко</span>
+          </h3>
+          {sessions.filter((s) => s.sn > 0).map(({ sn, films: sf }) => {
+            const sessionVotes = (allVotes ?? []).filter((v) => v.session_number === sn);
+            return (
+              <div key={sn} className="glass rounded-2xl overflow-hidden">
+                <div className="px-6 py-3 border-b border-white/10 flex items-center justify-between">
+                  <span className="font-display text-sm text-accent uppercase tracking-widest">Сеанс {sn}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Set(sessionVotes.map((v) => v.user_id)).size} проголосовавших
+                  </span>
+                </div>
+                <AllFilmsResults films={sf} votes={sessionVotes} isLoading={filmsLoading || votesLoading} />
+              </div>
+            );
+          })}
         </div>
-        <AllFilmsResults films={films ?? []} votes={allVotes ?? []} isLoading={filmsLoading || votesLoading} />
-      </div>
+      )}
     </div>
   );
 }
