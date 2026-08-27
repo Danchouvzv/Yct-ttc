@@ -1,5 +1,5 @@
-// Registration deadline: 10 August 2026, 23:59 Asia/Almaty (UTC+5) ⇒ 2026-08-10T18:59:00Z
-export const REGISTRATION_DEADLINE = new Date("2026-08-10T18:59:00Z");
+// Registration deadline: 3 September 2026, 23:59 Asia/Almaty (UTC+5) ⇒ 2026-09-03T18:59:00Z
+export const REGISTRATION_DEADLINE = new Date("2026-09-03T18:59:00Z");
 
 // Film submission deadline: 15 August 2026, 23:59 Asia/Almaty (UTC+5) ⇒ 2026-08-15T18:59:00Z
 export const SUBMISSION_DEADLINE = new Date("2026-08-15T18:59:00Z");
